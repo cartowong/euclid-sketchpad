@@ -1,0 +1,175 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #222;
+    background: #fff;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    color: #2196F3;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* Header */
+.site-header {
+    padding: 32px 0 16px;
+    text-align: center;
+}
+
+.site-header img {
+    width: 96px;
+    height: 96px;
+}
+
+.site-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 12px 0 8px;
+}
+
+.site-header .tagline {
+    font-size: 1.1rem;
+    color: #555;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Hero screenshot */
+.hero {
+    margin: 32px 0;
+    text-align: center;
+}
+
+.hero img {
+    max-width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* Download button */
+.download {
+    text-align: center;
+    margin: 32px 0;
+}
+
+.download a {
+    display: inline-block;
+    background: #2196F3;
+    color: #fff;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.download a:hover {
+    background: #1976D2;
+    text-decoration: none;
+}
+
+/* Features */
+.features {
+    margin: 40px 0;
+}
+
+.features h2 {
+    font-size: 1.4rem;
+    margin-bottom: 16px;
+}
+
+.features ul {
+    list-style: none;
+    padding: 0;
+}
+
+.features li {
+    padding: 8px 0;
+    padding-left: 24px;
+    position: relative;
+}
+
+.features li::before {
+    content: "\2713";
+    position: absolute;
+    left: 0;
+    color: #4CAF50;
+    font-weight: 700;
+}
+
+.features li strong {
+    font-weight: 600;
+}
+
+/* Content pages (privacy, support) */
+.content {
+    margin: 40px 0;
+}
+
+.content h2 {
+    font-size: 1.3rem;
+    margin: 24px 0 8px;
+}
+
+.content p, .content ul {
+    margin-bottom: 12px;
+}
+
+.content ul {
+    padding-left: 24px;
+}
+
+/* Footer */
+.site-footer {
+    border-top: 1px solid #e0e0e0;
+    padding: 24px 0;
+    margin-top: 48px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #777;
+}
+
+.site-footer nav {
+    margin-bottom: 8px;
+}
+
+.site-footer nav a {
+    margin: 0 12px;
+    color: #555;
+}
+
+.site-footer nav a:hover {
+    color: #2196F3;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .site-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .site-header .tagline {
+        font-size: 1rem;
+    }
+
+    .features li {
+        font-size: 0.95rem;
+    }
+}
