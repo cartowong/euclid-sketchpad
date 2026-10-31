@@ -1,6 +1,7 @@
 package euclideansketchpad.ui
 
 import euclideansketchpad.geometry.*
+import euclideansketchpad.geometry.GeometryUtils.ANGLE_ARC_RADIUS
 import euclideansketchpad.model.GeometricObjectManager
 import euclideansketchpad.model.ManagerState
 import euclideansketchpad.model.UndoManager
@@ -27,7 +28,6 @@ class AngleTool(
 
     private companion object {
         const val POINT_RADIUS = 4.0
-        const val ARC_RADIUS = 20.0
     }
 
     private var pointAId: Int? = null
@@ -71,7 +71,7 @@ class AngleTool(
             val targetX = resolveTargetX(hit, worldX)
             val targetY = resolveTargetY(hit, worldY)
 
-            val arcRadius = ARC_RADIUS * counterScale
+            val arcRadius = ANGLE_ARC_RADIUS * counterScale
             val angleBA = atan2(pointAY - vertexY, pointAX - vertexX)
             val angleBC = atan2(targetY - vertexY, targetX - vertexX)
             val startDeg = -angleBA * 180.0 / PI // negate for y-flip

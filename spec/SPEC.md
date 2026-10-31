@@ -291,7 +291,7 @@ Colors are set **programmatically** in the renderer, not via CSS classes. CSS cl
 | Region fill | | `#FFEB3B` at 0.3 opacity (semi-transparent yellow) |
 | Angle fill | | `#4CAF50` at 0.3 opacity (semi-transparent green) |
 | Angle stroke | | `#4CAF50` at 0.7 opacity, 1px |
-| Angle arc radius | | 20px (counter-scaled to world coordinates) |
+| Angle arc radius | | 30px (counter-scaled to world coordinates) |
 | Arrowheads | | 8px triangles (counter-scaled) |
 
 ### 5.2 State Styles

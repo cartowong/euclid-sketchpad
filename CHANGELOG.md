@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+
+- Increased angle arc radius from 20px to 30px (screen pixels, counter-scaled)
+
+### Fixed
+
+- AngleTool preview arc now uses the shared `ANGLE_ARC_RADIUS` constant instead of a private hardcoded value, so the preview matches the rendered angle
+
 ## [1.5.3] - 2026-10-30
 
 ### Changed
