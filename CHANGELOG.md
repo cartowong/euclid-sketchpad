@@ -6,8 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [1.5.5] - 2026-11-02
+
 ### Added
 
+- `appName` field (`"EuclideanSketchpad"`) in the JSON serialization format for diagrams and constructions, validated on load before version checking
+- `APP_NAME` constant in `Main.kt` as the single source of truth for the app name
 - GitHub Pages site in `docs/` with landing page, privacy policy, and support page for App Store submission
 
 ## [1.5.4] - 2026-10-31

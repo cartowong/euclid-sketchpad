@@ -565,6 +565,7 @@ JSON via kotlinx.serialization. Top-level structure:
 
 ```json
 {
+  "appName": "EuclideanSketchpad",
   "version": "1.0.0",
   "objects": [ { "id": 0, "type": "FreePoint", "x": 100.0, "y": 50.0 }, ... ],
   "metadata": { "0": { "visible": true, "label": "A", ... }, ... },
@@ -592,14 +593,17 @@ Same JSON format as diagrams, with these differences:
 
 ### 11.4 Versioning
 
-Every JSON file (diagram or construction) includes a top-level `"version"` field set to the app's current version string (e.g. `"1.0.0"`). The version string follows `<major>.<minor>.<patch>` format.
+Every JSON file (diagram or construction) includes top-level `"appName"` and `"version"` fields. The `appName` is always `"EuclideanSketchpad"`. The version string follows `<major>.<minor>.<patch>` format and is set to the app's current version string (e.g. `"1.0.0"`).
 
-**Version constant**: defined once as `APP_VERSION` in `Main.kt`. Referenced by both serializers and the About dialog.
+**Constants**: `APP_NAME` and `APP_VERSION` are defined once as top-level `const val`s in `Main.kt`. Referenced by both serializers and the About dialog.
+
+**Validation on load** (in order):
+1. **App name check**: if `appName` is not `"EuclideanSketchpad"`, the file is rejected with an `IncompatibleAppNameException`.
+2. **Version check**: the app parses the major version from the file's `"version"` field and compares it to its own major version. If they differ, the file is rejected with an `IncompatibleVersionException`.
+3. Both fields are required in `SerializedDiagram` (no defaults); files missing either field are rejected during deserialization.
 
 **Compatibility contract**:
 - Within a major version, all changes to the serialization format must be **additive only**: new fields with defaults, new object types. Renaming, removing, or changing the semantics of existing fields requires a major version bump.
-- On load, the app parses the major version from the file's `"version"` field and compares it to the app's own major version. If they differ, the file is rejected with an error dialog.
-- Files without a `"version"` field are rejected (the field is required in `SerializedDiagram`).
 
 ---
 

@@ -1,5 +1,6 @@
 package euclideansketchpad.persistence
 
+import euclideansketchpad.APP_NAME
 import euclideansketchpad.APP_VERSION
 import euclideansketchpad.geometry.*
 import euclideansketchpad.model.GeometricObjectManager
@@ -131,13 +132,14 @@ class DiagramSerializerTest {
     }
 
     @Test
-    fun `round trip preserves version`() {
+    fun `round trip preserves appName and version`() {
         val mgr1 = GeometricObjectManager()
         mgr1.addObject { id -> FreePoint(id, 0.0, 0.0) }
 
         val json = DiagramSerializer.serialize(mgr1)
         val diagram = DiagramSerializer.parseDiagram(json)
 
+        assertEquals(APP_NAME, diagram.appName)
         assertEquals(APP_VERSION, diagram.version)
     }
 
@@ -145,6 +147,7 @@ class DiagramSerializerTest {
     fun `deserialize rejects incompatible major version`() {
         val json = """
             {
+                "appName": "EuclideanSketchpad",
                 "version": "2.0",
                 "objects": [],
                 "metadata": {}
@@ -158,9 +161,27 @@ class DiagramSerializerTest {
     }
 
     @Test
+    fun `deserialize rejects incompatible appName`() {
+        val json = """
+            {
+                "appName": "SomeOtherApp",
+                "version": "1.0",
+                "objects": [],
+                "metadata": {}
+            }
+        """.trimIndent()
+
+        val mgr = GeometricObjectManager()
+        assertThrows<IncompatibleAppNameException> {
+            DiagramSerializer.deserialize(json, mgr)
+        }
+    }
+
+    @Test
     fun `deserialize accepts compatible minor version`() {
         val json = """
             {
+                "appName": "EuclideanSketchpad",
                 "version": "1.99",
                 "objects": [{"id": 0, "type": "FreePoint", "x": 1.0, "y": 2.0}],
                 "metadata": {}

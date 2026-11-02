@@ -1,6 +1,6 @@
 # Euclidean Sketchpad — Handoff Document
 
-**Date:** 2026-10-31
+**Date:** 2026-11-02
 **Branch:** `main`
 
 ## Current State
@@ -9,7 +9,7 @@
 - **Git:** `.claude/` is gitignored.
 - **Runtime:** `./gradlew run` launches the full app.
 - **Headless export:** `./gradlew run --args="--export <diagram.json> [outDir]"` exports 6 files without opening the GUI.
-- **Packaging:** `./gradlew jpackage` produces `build/jpackage/EuclideanSketchpad-1.5.4.dmg` (~35 MB). `./gradlew jpackageImage` builds just the `.app` (faster, for testing). Not code-signed.
+- **Packaging:** `./gradlew jpackage` produces `build/jpackage/EuclideanSketchpad-1.5.5.dmg` (~35 MB). `./gradlew jpackageImage` builds just the `.app` (faster, for testing). Not code-signed.
 - **License:** GPL v3.0. Third-party notices for AtlantaFX (MIT), OpenJFX (GPL 2.0 + Classpath Exception), and kotlinx.serialization (Apache 2.0) are bundled in `src/main/resources/THIRD_PARTY_NOTICES` and viewable from the About dialog.
 - **Spec alignment:** All features described in `spec/SPEC.md` are implemented, including the `LinearLike` interface, 4 built-in constructions, specific type display names, "Custom Constructions" table rename, and viewport clipping for all object types.
 - **GitHub Pages:** `docs/` contains a static site (landing page, privacy policy, support page) served from `main` branch via GitHub Pages at `https://cartowong.github.io/euclidean-sketchpad/`. Images are copies of app assets to stay within the `/docs` serving root.
@@ -27,8 +27,8 @@
 - **AtlantaFX Primer Light theme.** Applied via `Application.setUserAgentStylesheet(PrimerLight().userAgentStylesheet)` at the top of `start()`, before any UI construction. The theme styles all standard JavaFX controls (menus, dialogs, tables, buttons). Programmatic colors and `geometry.css` structural styles are unaffected — scene stylesheets override the user agent stylesheet.
 - **Window size and pane ratios.** Window is 1440×720 and dividers are 30%/40%/30% to accommodate the theme's wider cell padding.
 - **Label hit-box accounts for scaleY=-1 visual shift.** The renderer uses `text.scaleY = -1.0` to un-mirror labels in the y-flipped world group. JavaFX pivots this around the layout-bounds center, shifting the visual text ~7px below the computed baseline. `LabelTool.hitTestLabel()` extends its hit box downward (`labelY - 10` to `labelY + 18`) to match the actual visual position.
-- **`APP_VERSION` is the single source of truth for the version string.** Defined as a top-level `const val` in `Main.kt`. Referenced by `DiagramSerializer`, `ConstructionSerializer`, and the About dialog.
-- **Diagram open validates before resetting.** `SketchpadApp` parses and validates the file's version before calling `resetDiagram()`, so a version mismatch doesn't destroy the user's current work. The entire open operation is wrapped in a try-catch that shows an error alert.
+- **`APP_NAME` and `APP_VERSION` are the single sources of truth** for the app name and version string. Both are top-level `const val`s in `Main.kt`. Referenced by `DiagramSerializer`, `ConstructionSerializer`, and the About dialog.
+- **Diagram open validates before resetting.** `SketchpadApp` parses and validates the file's `appName` and version before calling `resetDiagram()`, so an invalid file doesn't destroy the user's current work. The entire open operation is wrapped in a try-catch that shows an error alert.
 - **jpackage uses `org.beryx.runtime` plugin with hardcoded modules.** The plugin's auto-detection (`suggestModules`) crashes on deeply-nested Kotlin anonymous classes. Modules are explicitly set to `java.base`, `java.desktop`, `java.logging`, `jdk.unsupported`. The jpackage `appVersion` is read from `APP_VERSION` in `Main.kt` at build time (macOS jpackage rejects versions starting with `0`). The `.icns` icon at `packaging/macos/EuclideanSketchpad.icns` was generated from `app-icon.png` via `sips` + `iconutil`.
 - **Rendering constants and utilities are centralized in `GeometryUtils`.** `POINT_RADIUS`, `STROKE_WIDTH`, `LINE_EXTENT`, `ARROWHEAD_SIZE`, `ANGLE_ARC_RADIUS`, `FONT_SIZE`, and `VIEWPORT_MARGIN_FRACTION` are defined once there and imported by `GeometryRenderer`, `LineTool`, and `ExportRenderer`. Shared functions include `clipLineToRect` (Liang-Barsky), `clipCircleToArcs`, `clampToRect`, `computeClipRect`, `computeArrowheadVertices`, and `computeAdaptiveGridSpacing`. `getObjectAnchor()` is a top-level function in `model/ObjectMetadata.kt`.
 - **Viewport clipping uses a 2% margin inset.** `GeometryRenderer.renderAll()` and `renderPreviewObjects()` receive `viewportBounds` from `CanvasPane.getViewportMathBounds()`, compute a clip rect inset by 2% via `GeometryUtils.computeClipRect()`, and clip lines/rays/circles to it. Lines/rays use Liang-Barsky; circles use `clipCircleToArcs` which computes visible arc segments via circle-rectangle intersection. All tools receive a shared `viewportProvider` lambda from `SketchpadApp`.

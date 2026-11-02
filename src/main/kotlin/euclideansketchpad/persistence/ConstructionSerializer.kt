@@ -1,5 +1,6 @@
 package euclideansketchpad.persistence
 
+import euclideansketchpad.APP_NAME
 import euclideansketchpad.APP_VERSION
 import euclideansketchpad.geometry.*
 import euclideansketchpad.model.GeometricObjectManager
@@ -16,6 +17,7 @@ object ConstructionSerializer {
 
     fun loadFromFile(file: File): LoadedConstruction {
         val diagram = DiagramSerializer.parseDiagram(file.readText())
+        DiagramSerializer.validateAppName(diagram.appName)
         DiagramSerializer.validateVersion(diagram.version)
 
         // Find input objects (isInput=true in metadata), sorted by ID
@@ -63,7 +65,7 @@ object ConstructionSerializer {
                 isLocked = meta.isLocked
             )
         }
-        val diagram = SerializedDiagram(APP_VERSION, objects, metadata)
+        val diagram = SerializedDiagram(APP_NAME, APP_VERSION, objects, metadata)
         file.writeText(DiagramSerializer.encodeDiagram(diagram))
     }
 

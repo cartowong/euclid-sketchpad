@@ -1,5 +1,6 @@
 package euclideansketchpad.persistence
 
+import euclideansketchpad.APP_NAME
 import euclideansketchpad.APP_VERSION
 import euclideansketchpad.geometry.*
 import euclideansketchpad.model.GeometricObjectManager
@@ -10,6 +11,7 @@ import kotlinx.serialization.json.Json
 
 @Serializable
 data class SerializedDiagram(
+    val appName: String,
     val version: String,
     val objects: List<SerializedObject>,
     val metadata: Map<Int, SerializedMetadata>,
@@ -45,6 +47,8 @@ data class SerializedObject(
     val pointIds: List<Int>? = null
 )
 
+class IncompatibleAppNameException(message: String) : Exception(message)
+
 class IncompatibleVersionException(message: String) : Exception(message)
 
 private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
@@ -76,12 +80,13 @@ object DiagramSerializer {
             // Convert to Map<Int, SerializedMetadata>
             it.map { (k, v) -> k.toInt() to v }.toMap()
         }
-        val diagram = SerializedDiagram(APP_VERSION, objects, metadata)
+        val diagram = SerializedDiagram(APP_NAME, APP_VERSION, objects, metadata)
         return json.encodeToString(diagram)
     }
 
     fun deserialize(jsonStr: String, manager: GeometricObjectManager) {
         val diagram = json.decodeFromString<SerializedDiagram>(jsonStr)
+        validateAppName(diagram.appName)
         validateVersion(diagram.version)
 
         // Sort objects by ID to maintain dependency order
@@ -127,6 +132,14 @@ object DiagramSerializer {
         is ReflectionPoint -> SerializedObject(obj.id, "ReflectionPoint", parentIds = listOf(obj.pointId, obj.linearId))
         is ParallelLine -> SerializedObject(obj.id, "ParallelLine", parentIds = listOf(obj.pointId, obj.linearId))
         is PerpendicularLine -> SerializedObject(obj.id, "PerpendicularLine", parentIds = listOf(obj.pointId, obj.linearId))
+    }
+
+    fun validateAppName(appName: String) {
+        if (appName != APP_NAME) {
+            throw IncompatibleAppNameException(
+                "This file is not a Euclidean Sketchpad file."
+            )
+        }
     }
 
     fun validateVersion(fileVersion: String) {

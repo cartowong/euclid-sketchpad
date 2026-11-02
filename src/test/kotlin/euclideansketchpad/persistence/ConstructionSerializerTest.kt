@@ -1,5 +1,6 @@
 package euclideansketchpad.persistence
 
+import euclideansketchpad.APP_NAME
 import euclideansketchpad.APP_VERSION
 import euclideansketchpad.geometry.*
 import euclideansketchpad.model.GeometricObjectManager
@@ -75,7 +76,7 @@ class ConstructionSerializerTest {
     }
 
     @Test
-    fun `save construction includes version`() {
+    fun `save construction includes appName and version`() {
         val mgr = GeometricObjectManager()
         mgr.addObject { id -> FreePoint(id, 0.0, 0.0) }
         mgr.getMetadata(0)!!.isInput = true
@@ -84,6 +85,7 @@ class ConstructionSerializerTest {
         ConstructionSerializer.saveConstruction(mgr, file)
 
         val diagram = DiagramSerializer.parseDiagram(file.readText())
+        assertEquals(APP_NAME, diagram.appName)
         assertEquals(APP_VERSION, diagram.version)
     }
 
@@ -92,6 +94,7 @@ class ConstructionSerializerTest {
         val file = File(tempDir, "bad_version.json")
         file.writeText("""
             {
+                "appName": "EuclideanSketchpad",
                 "version": "2.0",
                 "objects": [{"id": 0, "type": "FreePoint", "x": 0.0, "y": 0.0}],
                 "metadata": {"0": {"isInput": true}}
@@ -99,6 +102,23 @@ class ConstructionSerializerTest {
         """.trimIndent())
 
         assertThrows<IncompatibleVersionException> {
+            ConstructionSerializer.loadFromFile(file)
+        }
+    }
+
+    @Test
+    fun `load construction rejects incompatible appName`() {
+        val file = File(tempDir, "bad_app.json")
+        file.writeText("""
+            {
+                "appName": "SomeOtherApp",
+                "version": "1.0",
+                "objects": [{"id": 0, "type": "FreePoint", "x": 0.0, "y": 0.0}],
+                "metadata": {"0": {"isInput": true}}
+            }
+        """.trimIndent())
+
+        assertThrows<IncompatibleAppNameException> {
             ConstructionSerializer.loadFromFile(file)
         }
     }

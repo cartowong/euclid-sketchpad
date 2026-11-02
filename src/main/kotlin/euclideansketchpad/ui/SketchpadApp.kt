@@ -197,6 +197,7 @@ class SketchpadApp : Application() {
                     val json = file.readText()
                     // Parse and validate version before resetting the current diagram
                     val diagram = DiagramSerializer.parseDiagram(json)
+                    DiagramSerializer.validateAppName(diagram.appName)
                     DiagramSerializer.validateVersion(diagram.version)
                     resetDiagram(manager, undoManager, hitTester)
                     DiagramSerializer.deserialize(json, manager)
