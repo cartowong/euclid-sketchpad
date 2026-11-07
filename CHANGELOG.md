@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [1.5.6] - 2026-11-07
+
+### Changed
+
+- Decreased angle arc radius from 30px to 25px (screen pixels, counter-scaled)
+- Updated application screenshot
+
 ## [1.5.5] - 2026-11-02
 
 ### Added

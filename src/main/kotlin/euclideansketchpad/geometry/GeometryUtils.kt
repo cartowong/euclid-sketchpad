@@ -20,7 +20,7 @@ object GeometryUtils {
     const val STROKE_WIDTH = 2.0
     const val LINE_EXTENT = 100000.0
     const val ARROWHEAD_SIZE = 8.0
-    const val ANGLE_ARC_RADIUS = 30.0
+    const val ANGLE_ARC_RADIUS = 25.0
     const val FONT_SIZE = 12.0
     const val VIEWPORT_MARGIN_FRACTION = 0.02
 
