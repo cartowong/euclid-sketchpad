@@ -6,7 +6,7 @@ plugins {
     application
 }
 
-group = "euclideansketchpad"
+group = "euclidsketchpad"
 version = "0.1.0"
 
 repositories {
@@ -30,7 +30,7 @@ tasks.test {
 }
 
 application {
-    mainClass.set("euclideansketchpad.MainKt")
+    mainClass.set("euclidsketchpad.MainKt")
 }
 
 kotlin {
@@ -45,22 +45,22 @@ runtime {
 
     jpackage {
         // Read APP_VERSION from Main.kt so there's a single source of truth
-        val mainKt = file("src/main/kotlin/euclideansketchpad/Main.kt").readText()
+        val mainKt = file("src/main/kotlin/euclidsketchpad/Main.kt").readText()
         val versionMatch = Regex("""APP_VERSION\s*=\s*"([^"]+)"""").find(mainKt)
         appVersion = versionMatch?.groupValues?.get(1) ?: "1.0.0"
-        imageName = "Euclidean Sketchpad"
-        installerName = "EuclideanSketchpad"
+        imageName = "Euclid Sketchpad"
+        installerName = "EuclidSketchpad"
 
         if (currentOs.isMacOsX) {
             installerType = "dmg"
-            imageOptions = listOf("--icon", "${project.projectDir}/packaging/macos/EuclideanSketchpad.icns")
+            imageOptions = listOf("--icon", "${project.projectDir}/packaging/macos/EuclidSketchpad.icns")
             installerOptions = listOf(
                 "--vendor", "MathVisuals",
-                "--mac-package-name", "Euclidean Sketchpad"
+                "--mac-package-name", "Euclid Sketchpad"
             )
         } else if (currentOs.isWindows) {
             installerType = "msi"
-            imageOptions = listOf("--icon", "${project.projectDir}/packaging/windows/EuclideanSketchpad.ico")
+            imageOptions = listOf("--icon", "${project.projectDir}/packaging/windows/EuclidSketchpad.ico")
             installerOptions = listOf(
                 "--vendor", "MathVisuals",
                 "--win-dir-chooser",

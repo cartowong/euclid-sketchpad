@@ -1,4 +1,4 @@
-# Euclidean Sketchpad — Application Specification
+# Euclid Sketchpad — Application Specification
 
 A desktop application for creating geometric constructions using compass and straightedge. Geometry engine details are in [GEOMETRY.md](GEOMETRY.md).
 
@@ -25,7 +25,7 @@ A desktop application for creating geometric constructions using compass and str
 ### 2.1 Package Structure
 
 ```
-src/main/kotlin/euclideansketchpad/
+src/main/kotlin/euclidsketchpad/
   geometry/         # Pure geometry library (no JavaFX imports) — see GEOMETRY.md
   model/            # GeometricObjectManager, undo/redo, construction recording/applying
   persistence/      # JSON serialization/deserialization for diagrams and constructions
@@ -463,7 +463,7 @@ All File menu items are disabled during construction recording.
 
 | Item | Description |
 |------|-------------|
-| About Euclidean Sketchpad | Dialog with app icon, version, description, copyright, license, GitHub link |
+| About Euclid Sketchpad | Dialog with app icon, version, description, copyright, license, GitHub link |
 
 ---
 
@@ -565,7 +565,7 @@ JSON via kotlinx.serialization. Top-level structure:
 
 ```json
 {
-  "appName": "EuclideanSketchpad",
+  "appName": "EuclidSketchpad",
   "version": "1.0.0",
   "objects": [ { "id": 0, "type": "FreePoint", "x": 100.0, "y": 50.0 }, ... ],
   "metadata": { "0": { "visible": true, "label": "A", ... }, ... },
@@ -593,12 +593,12 @@ Same JSON format as diagrams, with these differences:
 
 ### 11.4 Versioning
 
-Every JSON file (diagram or construction) includes top-level `"appName"` and `"version"` fields. The `appName` is always `"EuclideanSketchpad"`. The version string follows `<major>.<minor>.<patch>` format and is set to the app's current version string (e.g. `"1.0.0"`).
+Every JSON file (diagram or construction) includes top-level `"appName"` and `"version"` fields. The `appName` is always `"EuclidSketchpad"`. The version string follows `<major>.<minor>.<patch>` format and is set to the app's current version string (e.g. `"1.0.0"`).
 
 **Constants**: `APP_NAME` and `APP_VERSION` are defined once as top-level `const val`s in `Main.kt`. Referenced by both serializers and the About dialog.
 
 **Validation on load** (in order):
-1. **App name check**: if `appName` is not `"EuclideanSketchpad"`, the file is rejected with an `IncompatibleAppNameException`.
+1. **App name check**: if `appName` is not `"EuclidSketchpad"`, the file is rejected with an `IncompatibleAppNameException`.
 2. **Version check**: the app parses the major version from the file's `"version"` field and compares it to its own major version. If they differ, the file is rejected with an `IncompatibleVersionException`.
 3. Both fields are required in `SerializedDiagram` (no defaults); files missing either field are rejected during deserialization.
 

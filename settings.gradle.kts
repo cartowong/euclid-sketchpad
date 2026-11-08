@@ -1,1 +1,1 @@
-rootProject.name = "EuclideanSketchpad"
+rootProject.name = "EuclidSketchpad"

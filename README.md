@@ -1,14 +1,14 @@
 <p align="center">
-  <img src="src/main/resources/icons/app-icon.png" alt="Euclidean Sketchpad" width="128" height="128">
+  <img src="src/main/resources/icons/app-icon.png" alt="Euclid Sketchpad" width="128" height="128">
 </p>
 
-<h1 align="center">Euclidean Sketchpad</h1>
+<h1 align="center">Euclid Sketchpad</h1>
 
 <p align="center">
   A desktop application for creating geometric constructions using compass and straightedge.
 </p>
 
-![Screenshot](assets/euclideanSketchpad.png)
+![Screenshot](assets/euclidSketchpad.png)
 
 ## Features
 
@@ -23,21 +23,21 @@
 
 ## Download
 
-Download the latest release from the [Releases](https://github.com/cartowong/euclidean-sketchpad/releases) page.
+Download the latest release from the [Releases](https://github.com/cartowong/euclid-sketchpad/releases) page.
 
 ### macOS
 
-Download the `.dmg` file, open it, and drag **Euclidean Sketchpad** to your Applications folder.
+Download the `.dmg` file, open it, and drag **Euclid Sketchpad** to your Applications folder.
 
 > **Note:** The app is not code-signed. On first launch, macOS will block it. To open it:
 > 1. Double-click the app to trigger the warning, then dismiss it.
 > 2. Go to **System Settings → Privacy & Security**.
-> 3. Scroll down to find the message about Euclidean Sketchpad being blocked.
+> 3. Scroll down to find the message about Euclid Sketchpad being blocked.
 > 4. Click **Open Anyway** and enter your password.
 
 ### Windows
 
-Download the `.msi` file and run it to install **Euclidean Sketchpad**. The installer lets you choose the installation directory and optionally adds a Start menu entry.
+Download the `.msi` file and run it to install **Euclid Sketchpad**. The installer lets you choose the installation directory and optionally adds a Start menu entry.
 
 ### Linux
 
@@ -45,7 +45,7 @@ Pre-built installers are not yet available. See [Building from Source](#building
 
 ## Building from Source
 
-> The rest of this README is for developers who want to build the project from source. If you just want to use the app, download the installer from the [Releases](https://github.com/cartowong/euclidean-sketchpad/releases) page above.
+> The rest of this README is for developers who want to build the project from source. If you just want to use the app, download the installer from the [Releases](https://github.com/cartowong/euclid-sketchpad/releases) page above.
 
 ### Prerequisites
 
@@ -120,8 +120,8 @@ Then retry `./gradlew run`. If the issue persists, check for stuck Java processe
 ```
 
 This produces a platform-specific installer:
-- **macOS**: `build/jpackage/EuclideanSketchpad-1.0.0.dmg`
-- **Windows**: `build/jpackage/EuclideanSketchpad-1.0.0.msi`
+- **macOS**: `build/jpackage/EuclidSketchpad-1.0.0.dmg`
+- **Windows**: `build/jpackage/EuclidSketchpad-1.0.0.msi`
 
 On macOS, you can also build just the `.app` bundle (faster, useful for testing):
 
@@ -129,7 +129,7 @@ On macOS, you can also build just the `.app` bundle (faster, useful for testing)
 ./gradlew jpackageImage
 ```
 
-The output will be at `build/jpackage/Euclidean Sketchpad.app`.
+The output will be at `build/jpackage/Euclid Sketchpad.app`.
 
 ## Changelog
 
