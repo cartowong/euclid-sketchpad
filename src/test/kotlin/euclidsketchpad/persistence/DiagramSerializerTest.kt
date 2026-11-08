@@ -148,7 +148,7 @@ class DiagramSerializerTest {
         val json = """
             {
                 "appName": "EuclidSketchpad",
-                "version": "2.0",
+                "version": "3.0",
                 "objects": [],
                 "metadata": {}
             }
@@ -182,7 +182,7 @@ class DiagramSerializerTest {
         val json = """
             {
                 "appName": "EuclidSketchpad",
-                "version": "1.99",
+                "version": "2.99",
                 "objects": [{"id": 0, "type": "FreePoint", "x": 1.0, "y": 2.0}],
                 "metadata": {}
             }

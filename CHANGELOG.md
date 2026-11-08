@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.0.0] - 2026-11-08
+
+### Changed
+
+- **Breaking:** Renamed app from "Euclidean Sketchpad" to "Euclid Sketchpad" — package directories, Kotlin sources, build config, icon files, display strings, JSON serialization (`appName`), documentation, and GitHub Pages all updated
+- Saved diagrams and construction files from v1.x are not compatible (different `appName` value)
+- Updated application screenshot
+
 ## [1.5.7] - 2026-11-07
 
 ### Fixed

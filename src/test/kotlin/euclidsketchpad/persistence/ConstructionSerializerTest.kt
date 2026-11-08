@@ -95,7 +95,7 @@ class ConstructionSerializerTest {
         file.writeText("""
             {
                 "appName": "EuclidSketchpad",
-                "version": "2.0",
+                "version": "3.0",
                 "objects": [{"id": 0, "type": "FreePoint", "x": 0.0, "y": 0.0}],
                 "metadata": {"0": {"isInput": true}}
             }
