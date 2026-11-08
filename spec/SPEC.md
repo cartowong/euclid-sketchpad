@@ -113,11 +113,13 @@ All methods have default no-op implementations. `onEscapePressed` returns `true`
 
 ### 3.4 Selection Tool
 
-- **Click an object**: toggle selection. No modifier key needed for multi-select.
+- **Click an object**: deselects all other objects, selects the clicked object. If the clicked object is already the only selected object, deselects it.
+- **Modifier+click an object** (`isShortcutDown` — Cmd on macOS, Ctrl on others): toggles the clicked object's selection without affecting other selected objects.
+- **Click on empty canvas**: clears all selection (with or without modifier).
 - **Selected objects** are rendered in blue (stroke and fill).
 - **Dragging when all objects are selected**: if every object in the manager is selected, dragging pans the viewport (same transform math as Space+drag) instead of moving objects. No undo checkpoint is created. Objects are not deselected on release.
 - **Dragging (subset selection)**: works only when **all** selected objects pass `manager.isMovable()` (free or semi-free points). The tool:
-  1. On mousedown, takes a snapshot.
+  1. On mousedown, takes a snapshot. Selection rules (plain click deselects others, modifier+click toggles) are applied before the drag begins.
   2. On drag, applies the displacement to each selected point via `manager.movePoint()`.
   3. On mouseup, creates an undo checkpoint. The entire drag is a single undo entry.
 - If any selected object is not movable (and it's not an all-selected pan), dragging does nothing.
@@ -229,7 +231,7 @@ Three-column layout. Initial window size: **1440x720**. Initial divider position
 | `Region` | Region |
 
 - **"Show hidden objects"** checkbox: when unchecked, rows with `visible = false` are hidden from the table.
-- **Two-way selection binding**: clicking a row selects the object on canvas. Selecting on canvas highlights the row. Toggle behavior (click to select/deselect without modifier key).
+- **Two-way selection binding**: clicking a row selects the object on canvas (deselecting all others). Selecting on canvas highlights the row. Modifier+click (Cmd/Ctrl) toggles without deselecting others — same behavior as the canvas Selection Tool.
 - **Delete**: removes the object and all descendants via `manager.removeWithDescendants()`.
 
 ### 4.3 Measurement Table

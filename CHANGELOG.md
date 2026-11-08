@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 - **Breaking:** Renamed app from "Euclidean Sketchpad" to "Euclid Sketchpad" — package directories, Kotlin sources, build config, icon files, display strings, JSON serialization (`appName`), documentation, and GitHub Pages all updated
 - Saved diagrams and construction files from v1.x are not compatible (different `appName` value)
+- Selection behavior: plain click now selects only the clicked object (deselecting all others). Modifier+click (Cmd on macOS, Ctrl on others) toggles selection without affecting other objects. Applies to both canvas and Object List table
 - Updated application screenshot
 
 ## [1.5.7] - 2026-11-07
