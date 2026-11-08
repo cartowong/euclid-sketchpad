@@ -60,12 +60,22 @@ class SelectionTool(
             }
             pressHitId = hitId
             if (hitId != null) {
-                wasAlreadySelected = selectedIds.contains(hitId)
-                if (!wasAlreadySelected) {
+                if (e.isShortcutDown) {
+                    // Modifier+click: toggle without affecting others
+                    if (selectedIds.contains(hitId)) {
+                        selectedIds.remove(hitId)
+                    } else {
+                        selectedIds.add(hitId)
+                    }
+                    wasAlreadySelected = false
+                } else {
+                    // Plain click: deselect others, select this one.
+                    // If it was already the only selected, defer deselect to release.
+                    wasAlreadySelected = selectedIds.contains(hitId) && selectedIds.size == 1
+                    selectedIds.clear()
                     selectedIds.add(hitId)
-                    requestRender()
                 }
-                // If already selected, defer deselection to onMouseReleased
+                requestRender()
             }
         } else {
             pressHitId = null

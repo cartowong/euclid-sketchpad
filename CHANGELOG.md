@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.1.0] - 2026-11-08
+
+### Changed
+
+- Implement modifier-click selection behavior: plain click single-selects (deselects all others), modifier+click (Cmd on macOS, Ctrl on others) toggles without affecting other objects. Applies to both canvas Selection tool and Object List table
+- Updated application screenshot
+
 ## [2.0.0] - 2026-11-08
 
 ### Changed

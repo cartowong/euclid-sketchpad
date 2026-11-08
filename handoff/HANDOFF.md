@@ -43,4 +43,4 @@
 
 ## Known Issues / Gaps
 
-- **Selection behavior not yet implemented.** The spec (Section 3.4, Section 4.2) describes modifier-click selection (plain click = single-select, Cmd/Ctrl+click = toggle). The current code still uses the old toggle-without-modifier behavior. Files to change: `SelectionTool.kt` (canvas clicks) and `Sidebar.kt` (table row clicks). Both use `event.isShortcutDown` to detect the modifier.
+None.
