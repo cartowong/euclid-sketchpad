@@ -138,6 +138,7 @@ class CanvasPane(
     ) {
         applyMode = ApplyModeState(expectedTypes, 0, mutableListOf(), onComplete, onCancel, previewProvider)
         updateHintLabel()
+        requestFocus()
     }
 
     private fun cancelApplyMode() {

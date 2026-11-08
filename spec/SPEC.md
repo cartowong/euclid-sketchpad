@@ -434,7 +434,7 @@ All File menu items are disabled during construction recording.
 |------|----------|-------------|
 | Start Recording | ⌘R | Begin recording |
 | Save Recording | ⌘⇧S | Save construction to JSON |
-| Cancel Recording | Escape | Discard and restore |
+| Cancel Recording | — | Discard and restore (Escape key, handled via canvas fallthrough) |
 | *(separator)* | | |
 | Load Construction | ⌘L | Load `.json` files (multi-select) |
 | Load from Folder... | ⌘⇧L | Load all `.json` from a directory |
