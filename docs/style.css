@@ -85,6 +85,13 @@ a:hover {
     text-decoration: none;
 }
 
+/* Also available */
+.also-available {
+    text-align: center;
+    color: #555;
+    font-size: 0.95rem;
+}
+
 /* Features */
 .features {
     margin: 40px 0;
