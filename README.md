@@ -97,6 +97,16 @@ You do **not** need to install Gradle separately. The project includes the Gradl
 
 On Windows, use `gradlew.bat run` instead.
 
+#### Troubleshooting: JavaFX `ArrayIndexOutOfBoundsException` on macOS
+
+If `./gradlew run` fails with `java.lang.ArrayIndexOutOfBoundsException` at `Screen.getMainScreen`, JavaFX cannot connect to the macOS window server. Reset the window server by restarting the Dock:
+
+```bash
+killall Dock
+```
+
+Then retry `./gradlew run`. If the issue persists, check for stuck Java processes (`ps aux | grep java`) and kill them.
+
 ### Run the tests
 
 ```bash
