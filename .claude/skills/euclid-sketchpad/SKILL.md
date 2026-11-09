@@ -1,7 +1,7 @@
 ---
 name: euclid-sketchpad
-description: Project skills for Euclid Sketchpad. Supports 4 actions — "deploy app" (version release), "export diagram" (headless PNG/SVG), "merge pr" (merge release PR and push tag), "save changes" (update docs and commit). Use when user says "deploy", "release", "cut a release", "export diagram", "merge release", "merge release pr", "save changes", or invokes /euclid-sketchpad.
-allowed-tools: Bash(git tag *) Bash(git add *) Bash(git commit *) Bash(git push *) Bash(gh pr *) Bash(./gradlew *) Bash(ls *) Bash(git checkout *) Bash(git pull *) Bash(git branch *) Bash(git diff *) Bash(git log *) Bash(git status *)
+description: Project skills for Euclid Sketchpad. Supports 5 actions — "deploy app" (version release), "export diagram" (headless PNG/SVG), "merge pr" (merge release PR and push tag), "save changes" (update docs and commit), "update screenshot" (copy app screenshot to GitHub Pages). Use when user says "deploy", "release", "cut a release", "export diagram", "merge release", "merge release pr", "save changes", "update screenshot", or invokes /euclid-sketchpad.
+allowed-tools: Bash(git tag *) Bash(git add *) Bash(git commit *) Bash(git push *) Bash(gh pr *) Bash(./gradlew *) Bash(ls *) Bash(git checkout *) Bash(git pull *) Bash(git branch *) Bash(git diff *) Bash(git log *) Bash(git status *) Bash(cp *)
 ---
 
 # Euclid Sketchpad
@@ -16,6 +16,7 @@ Parse the user's input after the skill name to determine which action to run:
 | "export" | [Export Diagram](#export-diagram) |
 | "merge" | [Merge Release PR](#merge-release-pr) |
 | "save" | [Save Changes](#save-changes) |
+| "update screenshot", "screenshot" | [Update Screenshot](#update-screenshot) |
 
 If the action is ambiguous or not provided, ask the user which action they want.
 
@@ -73,16 +74,24 @@ Edit `src/main/kotlin/euclidsketchpad/Main.kt` — change the `APP_VERSION` cons
   - Outdated build state, test counts, or architecture notes.
 - If updates are needed, make them. If everything is current, skip.
 
-#### 4. Run tests
+#### 4. Update screenshot
+
+Copy the application screenshot to the GitHub Pages site:
+
+```
+cp assets/euclidSketchpad.png docs/images/screenshot.png
+```
+
+#### 5. Run tests
 
 Run `./gradlew clean test`. If any test fails, **stop the release** and report failures.
 
-#### 5. Git tag and commit
+#### 6. Git tag and commit
 
 - Stage all changed files by name.
 - Commit with message: `Release v<version>`
 
-#### 6. Push and release
+#### 7. Push and release
 
 Check which branch you are on (`git branch --show-current`).
 
@@ -234,3 +243,19 @@ Run `./gradlew clean test`. If any test fails, **stop** and report failures.
 
   Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
   ```
+
+---
+
+## Update Screenshot
+
+Copy the application screenshot from `assets/euclidSketchpad.png` to `docs/images/screenshot.png` for the GitHub Pages site.
+
+### Steps
+
+1. Verify `assets/euclidSketchpad.png` exists.
+2. Copy:
+   ```
+   cp assets/euclidSketchpad.png docs/images/screenshot.png
+   ```
+3. Confirm the copy succeeded with `ls -la docs/images/screenshot.png`.
+4. Tell the user the screenshot has been updated. Remind them to commit if they want to persist the change.
