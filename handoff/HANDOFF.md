@@ -11,7 +11,7 @@
 - **Headless export:** `./gradlew run --args="--export <diagram.json> [outDir]"` exports 6 files without opening the GUI.
 - **Packaging:** `./gradlew jpackage` produces `build/jpackage/EuclidSketchpad-2.0.0.dmg` (~35 MB). `./gradlew jpackageImage` builds just the `.app` (faster, for testing). Not code-signed.
 - **License:** GPL v3.0. Third-party notices for AtlantaFX (MIT), OpenJFX (GPL 2.0 + Classpath Exception), and kotlinx.serialization (Apache 2.0) are bundled in `src/main/resources/THIRD_PARTY_NOTICES` and viewable from the About dialog.
-- **Spec alignment:** All features described in `spec/SPEC.md` are implemented, except for the modifier-click selection behavior (spec updated, implementation pending).
+- **Spec alignment:** All features described in `spec/SPEC.md` are implemented, except for the per-object styling system (Section 14, spec updated, implementation pending).
 - **GitHub Pages:** `docs/` contains a static site (landing page, privacy policy, support page) served from `main` branch via GitHub Pages at `https://cartowong.github.io/euclid-sketchpad/`. Images are copies of app assets to stay within the `/docs` serving root.
 
 ## Architecture Notes
@@ -40,6 +40,8 @@
 - **Pan-on-all-selected uses callback lambdas.** `SelectionTool` receives `allObjectsSelected` and `panViewport` lambdas from `SketchpadApp`. When all manager objects are in `selectedIds`, dragging calls `panViewport` with screen-pixel deltas (same `appendTranslation(dx/mxx, dy/myy)` math as `CanvasPane`'s Space+drag). No undo checkpoint is created for pan drags, and objects are not deselected on release.
 - **Headless export requires JavaFX Application.** PNG export uses `Node.snapshot()`, which needs the JavaFX toolkit. `HeadlessExportApp` is a full `Application` subclass that receives args via a companion object static field (standard pattern since `Application.launch()` doesn't forward constructor args). `main()` in `Main.kt` dispatches to it when `--export` is the first arg; otherwise launches `SketchpadApp` as before — no behavior change for normal app launch.
 - **Export label offsets negate `labelOffsetY` and add a baseline shift.** The canvas renderer positions labels at `anchorY + offsetY` in world coordinates and applies `scaleY = -1` to un-mirror text — the visual flip implicitly inverts the offset direction and also shifts the visual baseline by `ascent - descent` pixels (due to JavaFX pivoting the scale around the layout bounds center). The export renderers use `ty()` (which already flips y mathematically), so they apply `ty(anchorY) - offsetY + baselineShift` where `baselineShift = -(layoutBounds.minY + layoutBounds.maxY)` to match the canvas visual position.
+
+- **Per-object styling is specified but not yet implemented.** `spec/SPEC.md` Section 14 describes the full styling system (color, size, stroke style, stroke thickness per object, Style menu, right-click context menu, `StyleSettings`, backward-compatible serialization). Implementation is pending. Version will bump from 2.1.0 to 2.2.0.
 
 ## Known Issues / Gaps
 

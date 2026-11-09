@@ -43,7 +43,8 @@ src/main/resources/
 | Class | Package | Responsibility |
 |-------|---------|---------------|
 | `GeometricObjectManager` | model | Owns the object map (`LinkedHashMap<Int, GeometricObject>`) and metadata map. Provides `addObject`, `removeWithDescendants`, `movePoint`, `propagateFrom`, `snapshot`/`restore`, `nextDefaultLabel`. |
-| `ObjectMetadata` | model | Per-object mutable state: `visible`, `label`, `labelVisible`, `labelOffsetX/Y`, `inMeasurementTable`, `labelAnchorAngle`, `labelAnchorT`, `isInput`, `isLocked`. |
+| `ObjectMetadata` | model | Per-object mutable state: `visible`, `label`, `labelVisible`, `labelOffsetX/Y`, `inMeasurementTable`, `labelAnchorAngle`, `labelAnchorT`, `isInput`, `isLocked`, style fields (`color`, `size`, `strokeStyle`, `strokeThickness`). |
+| `StyleSettings` | model | Application-level default styles for newly created objects. One set of defaults per object category (Point, Linear, Circle, Angle, Region). |
 | `UndoManager` | model | Snapshot-based undo/redo. Stores a list of `ManagerState` snapshots. Tracks saved index for unsaved-changes detection. Supports `minIndex` clamping for recording mode. |
 | `ConstructionRecorder` | model | Manages recording lifecycle: `startRecording`, `cancelRecording`, `endRecording`. Sets `isInput`/`isLocked` flags. |
 | `ConstructionApplicator` | model | Applies a loaded construction to the current diagram. Handles ID remapping, type matching, and construction preview computation. |
@@ -284,25 +285,40 @@ Measurements update on every render (real-time during drag).
 
 Colors are set **programmatically** in the renderer, not via CSS classes. CSS classes (`point`, `segment`, `line`, `ray`, `circle`, `region`, `angle`, `label`) are added to nodes but colors are applied after CSS.
 
-| Element | Property | Value |
-|---------|----------|-------|
-| Points | Fill | Solid filled circle, black |
-| Points | Radius | 4px (screen pixels, counter-scaled) |
-| Lines/Segments/Rays/Circles | Stroke | 2px (screen pixels, counter-scaled) |
-| Default color | All objects | Black |
-| Region fill | | `#FFEB3B` at 0.3 opacity (semi-transparent yellow) |
-| Angle fill | | `#4CAF50` at 0.3 opacity (semi-transparent green) |
-| Angle stroke | | `#4CAF50` at 0.7 opacity, 1px |
-| Angle arc radius | | 25px (counter-scaled to world coordinates) |
-| Arrowheads | | 8px triangles (counter-scaled) |
+Each object has per-object style properties stored in `ObjectMetadata`. The renderer reads these to determine color, size, stroke style, and stroke thickness. See Section 14 for details.
+
+| Element | Property | Default Value |
+|---------|----------|---------------|
+| Points | Fill | Solid filled circle, per-object color (default black) |
+| Points | Radius | Per-object size: small 3px, medium 4px, large 6px (screen pixels, counter-scaled). Default medium |
+| Lines/Segments/Rays/Circles | Stroke | Per-object thickness: thin 1px, normal 2px, thick 3px (screen pixels, counter-scaled). Default normal |
+| Lines/Segments/Rays/Circles | Stroke style | Per-object: solid or dashed (6px dash, 4px gap, counter-scaled). Default solid |
+| Lines/Segments/Rays/Circles | Color | Per-object color (default black) |
+| Region fill | | Per-object color at 0.3 opacity (default yellow `#FFEB3B`) |
+| Angle fill | | Per-object color at 0.3 opacity (default green `#4CAF50`) |
+| Angle stroke | | Per-object color at 0.7 opacity, 1px |
+| Angle arc radius | | Per-object size: small 20px, medium 25px, large 30px (counter-scaled). Default medium |
+| Arrowheads | | 8px triangles (counter-scaled). Color matches the parent line/ray. Always solid-filled |
+| Labels | Fill | Always black, regardless of object color |
+
+**Color palette** (stored as name strings in metadata, mapped to hex at render time):
+
+| Name | Hex |
+|------|-----|
+| black | `#000000` |
+| brown | `#795548` |
+| green | `#4CAF50` |
+| purple | `#9C27B0` |
+| red | `#F44336` |
+| yellow | `#FFEB3B` |
 
 ### 5.2 State Styles
 
 | State | Style |
 |-------|-------|
-| Normal | Black, default size |
-| Selected | Blue (`#2196F3`) fill and stroke |
-| Hover | Blue (`#2196F3`), 1.5x stroke width (1.3x point radius) |
+| Normal | Per-object color, per-object size |
+| Selected | Blue (`#2196F3`) fill and stroke, overrides per-object color |
+| Hover | Blue (`#2196F3`), 1.5x stroke width (1.3x point radius), overrides per-object color |
 | Preview | Black, 0.4 opacity |
 | Construction preview | Orange (`#FF5722`), 0.4 opacity |
 
@@ -451,7 +467,23 @@ All File menu items are disabled during construction recording.
 - Not recording: Start, Load, Load from Folder, Unload All, and built-ins enabled. Save Recording and Cancel disabled.
 - Recording: Start, Load, Load from Folder, Unload All disabled. Save Recording, Cancel, and built-ins enabled. File menu items also disabled.
 
-### 8.4 View Menu
+### 8.4 Style Menu
+
+Controls the default styles applied to newly created objects. Located between the View and About menus. All items use radio menu items with checkmarks indicating the current setting. No keyboard shortcuts. The Style menu remains enabled during construction recording.
+
+Not persisted across sessions — resets to defaults on each launch.
+
+| Sub-menu | Properties | Default |
+|----------|-----------|---------|
+| Point | Size (small, medium, large), Color (black, brown, green, purple, red, yellow) | medium, black |
+| Linear | Color, Stroke Style (solid, dashed), Stroke Thickness (thin, normal, thick) | black, solid, normal |
+| Circle | Color, Stroke Style (solid, dashed), Stroke Thickness (thin, normal, thick) | black, solid, normal |
+| Angle | Size (small, medium, large), Color | medium, green |
+| Region | Color | yellow |
+
+When a new object is created (by a tool or construction apply), its style is copied from the current `StyleSettings` for its object category. `StyleSettings.applyDefaults(metadata, obj)` inspects the object type and copies the matching fields.
+
+### 8.5 View Menu
 
 | Item | Shortcut | Description |
 |------|----------|-------------|
@@ -461,7 +493,7 @@ All File menu items are disabled during construction recording.
 | Show / Hide Custom Constructions | — | Toggle constructions table in right pane (label toggles) |
 | Show / Hide Measurements | — | Toggle measurements table in right pane (label toggles) |
 
-### 8.5 About Menu
+### 8.6 About Menu
 
 | Item | Description |
 |------|-------------|
@@ -488,6 +520,13 @@ The renderer skips objects where `isLocked == true`. The `visible` field is neve
 2. **During recording**: user builds with normal tools. Built-in and custom constructions are available.
 3. **Save**: opens FileChooser. Serializes the entire diagram with `isInput`/`isLocked` flags, labels nulled. Clears all flags. Clears `minIndex`.
 4. **Cancel**: removes all objects with ID >= baseline. Clears all flags. Clears `minIndex`.
+
+### 9.2.1 Styles and Constructions
+
+Construction files do not save or load style information. When a construction is saved, object styles are ignored. When a construction is applied:
+- **Constructed objects** receive the current `StyleSettings` defaults for their object category (e.g., if Point color is currently red, all constructed points are red).
+- **Existing input objects** keep their existing styles unchanged.
+- **Invisible constructed objects** also receive the current style settings.
 
 ### 9.3 Recording Mode UI
 
@@ -579,7 +618,7 @@ JSON via kotlinx.serialization. Top-level structure:
 
 **SerializedObject fields**: `id`, `type` (string), `parentIds`, `x`, `y`, `t`, `theta`, `sign`, `pointIds`. Only relevant fields are populated per type.
 
-**SerializedMetadata fields**: `visible`, `label`, `labelVisible`, `labelOffsetX` (default 10), `labelOffsetY` (default -10), `inMeasurementTable`, `labelAnchorAngle`, `labelAnchorT`, `isInput`, `isLocked`. Unknown keys are ignored on load.
+**SerializedMetadata fields**: `visible`, `label`, `labelVisible`, `labelOffsetX` (default 10), `labelOffsetY` (default -10), `inMeasurementTable`, `labelAnchorAngle`, `labelAnchorT`, `isInput`, `isLocked`, `color` (default `"black"`), `size` (default `"medium"`), `strokeStyle` (default `"solid"`), `strokeThickness` (default `"normal"`). Unknown keys are ignored on load.
 
 ### 11.2 Diagram Save/Load
 
@@ -648,11 +687,10 @@ Exports at the canvas's current screen size. Width/height fields are non-editabl
 
 Both PNG and SVG exports share the same rendering logic:
 
-- Selection and hover states are cleared (all objects render black).
+- Selection and hover states are cleared (all objects render in their per-object color).
 - 5 passes: regions → angles → linears/circles → points → labels.
 - Lines, rays, and circles are clipped to the export region (with 2% margin inset). Lines and rays use **Liang-Barsky** clipping with arrowheads at clip points. Circles render only visible arc segments inside the clip rect.
-- Region fill: yellow (`#FFEB3B`, 0.3 opacity).
-- Angle fill: green (`#4CAF50`, 0.3 opacity).
+- Per-object styles (color, size, stroke style, stroke thickness) are respected in exports.
 - Grid uses the same adaptive spacing algorithm as the canvas.
 - Background: white (or transparent).
 
@@ -684,3 +722,97 @@ Escape is handled in priority order:
 1. **Apply mode active**: cancel apply mode.
 2. **Current tool has in-progress operation**: cancel it (e.g., cancel mid-construction line). Tool's `onEscapePressed()` returns `true`.
 3. **Recording mode active**: cancel recording (fires the Cancel Recording menu item via `onEscapeFallthrough`).
+
+---
+
+## 14. Per-Object Styling
+
+### 14.1 Style Properties
+
+Each object has style properties stored as fields on `ObjectMetadata`. All four fields exist on every metadata instance; the renderer ignores fields that don't apply to a given object type.
+
+| Field | Type | Default | Applies to |
+|-------|------|---------|------------|
+| `color` | String | `"black"` | All object types |
+| `size` | String | `"medium"` | Point (radius), Angle (arc radius) |
+| `strokeStyle` | String | `"solid"` | Linear, Circle |
+| `strokeThickness` | String | `"normal"` | Linear, Circle |
+
+**Style applicability by object category:**
+
+| Category | Color | Size | Stroke Style | Stroke Thickness |
+|----------|-------|------|-------------|-----------------|
+| Point | Yes | Yes | — | — |
+| Linear (Line, Ray, Segment, ParallelLine, PerpendicularLine) | Yes | — | Yes | Yes |
+| Circle | Yes | — | Yes | Yes |
+| Angle | Yes | Yes | — | — |
+| Region | Yes | — | — | — |
+
+### 14.2 Size Mappings
+
+**Point radius** (screen pixels, counter-scaled):
+
+| Value | Pixels |
+|-------|--------|
+| small | 3px |
+| medium | 4px |
+| large | 6px |
+
+**Angle arc radius** (screen pixels, counter-scaled):
+
+| Value | Pixels |
+|-------|--------|
+| small | 20px |
+| medium | 25px |
+| large | 30px |
+
+**Stroke thickness** (screen pixels, counter-scaled):
+
+| Value | Pixels |
+|-------|--------|
+| thin | 1px |
+| normal | 2px |
+| thick | 3px |
+
+Hover multipliers apply on top of the per-object size/thickness: 1.3x for point radius, 1.5x for stroke width.
+
+### 14.3 Stroke Styles
+
+| Value | Rendering |
+|-------|-----------|
+| solid | Continuous stroke (default) |
+| dashed | 6px dash, 4px gap (screen pixels, counter-scaled) |
+
+### 14.4 Default Styles for New Objects
+
+When a new object is created, its style is copied from the current `StyleSettings` using `StyleSettings.applyDefaults(metadata, obj)`. This function inspects the object type and copies the relevant fields.
+
+`StyleSettings` is owned by `SketchpadApp` and passed to tools and the construction applicator. Initial values:
+
+| Category | color | size | strokeStyle | strokeThickness |
+|----------|-------|------|-------------|-----------------|
+| Point | black | medium | — | — |
+| Linear | black | — | solid | normal |
+| Circle | black | — | solid | normal |
+| Angle | green | medium | — | — |
+| Region | yellow | — | — | — |
+
+The Style menu (Section 8.4) reads and writes these values. Not persisted across sessions.
+
+### 14.5 Changing Styles on Existing Objects
+
+Right-clicking on the canvas or object list table shows a context menu for changing styles of selected objects, subject to these conditions:
+
+- **Selection required**: no context menu if nothing is selected.
+- **Same-type selection**: all selected objects must belong to the same style category (Point, Linear, Circle, Angle, or Region). Line, Ray, and Segment are treated as the same category (Linear). No context menu for mixed-type selections.
+- **Right-click position is irrelevant**: the menu operates on the existing selection regardless of where the right-click occurs.
+
+The context menu contains sub-menus for each applicable style property (e.g., "Color", "Size" for points). Each sub-menu uses radio menu items. If all selected objects share the same value for a property, that value is checkmarked. If values are mixed, no item is checkmarked. Selecting a value applies it to all selected objects immediately.
+
+Style changes on existing objects create an undo checkpoint.
+
+### 14.6 Backward Compatibility
+
+Style fields in `SerializedMetadata` have defaults (`color = "black"`, `size = "medium"`, `strokeStyle = "solid"`, `strokeThickness = "normal"`), so old files without these fields deserialize correctly. On load, the deserializer detects the object type and overrides the color default for Angles (`"green"`) and Regions (`"yellow"`) to match the pre-styling rendering behavior.
+
+Construction files do not save or load style fields. The `ConstructionSerializer` strips style information when saving.
