@@ -14,12 +14,15 @@ class GeometricObjectManager {
     private val metadata = linkedMapOf<Int, ObjectMetadata>()
     private var nextId = 0
 
+    var onObjectAdded: ((GeometricObject) -> Unit)? = null
+
     fun addObject(factory: (id: Int) -> GeometricObject): GeometricObject {
         val id = nextId++
         val obj = factory(id)
         objects[id] = obj
         metadata[id] = ObjectMetadata()
         obj.recompute(objects)
+        onObjectAdded?.invoke(obj)
         return obj
     }
 
@@ -30,6 +33,7 @@ class GeometricObjectManager {
         if (id >= nextId) {
             nextId = id + 1
         }
+        onObjectAdded?.invoke(obj)
     }
 
     fun clear() {

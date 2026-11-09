@@ -1,12 +1,12 @@
 package euclidsketchpad.ui
 
 import euclidsketchpad.geometry.*
-import euclidsketchpad.geometry.GeometryUtils.ANGLE_ARC_RADIUS
 import euclidsketchpad.geometry.GeometryUtils.ARROWHEAD_SIZE
 import euclidsketchpad.geometry.GeometryUtils.LINE_EXTENT
 import euclidsketchpad.geometry.GeometryUtils.POINT_RADIUS
 import euclidsketchpad.geometry.GeometryUtils.STROKE_WIDTH
 import euclidsketchpad.model.GeometricObjectManager
+import euclidsketchpad.model.StyleSettings
 import euclidsketchpad.model.getObjectAnchor
 import javafx.scene.Group
 import javafx.scene.shape.Arc
@@ -23,8 +23,6 @@ import kotlin.math.abs
 
 private val SELECTED_COLOR = Color.web("#2196F3")
 private val HOVER_COLOR = Color.web("#2196F3")
-private val REGION_FILL = Color.web("#FFEB3B", 0.3)
-private val ANGLE_FILL = Color.web("#4CAF50", 0.3)
 private val PREVIEW_COLOR = Color.web("#FF5722")
 private const val PREVIEW_OPACITY = 0.4
 
@@ -65,12 +63,11 @@ object GeometryRenderer {
                 val polygon = FxPolygon(*coords)
                 polygon.fill = when {
                     isSelected || isHovered -> Color.web("#2196F3", 0.4)
-                    else -> REGION_FILL
+                    else -> Color.web(StyleSettings.colorToHex(meta.color), 0.3)
                 }
                 polygon.stroke = null
                 polygon.strokeWidth = 0.0
                 polygon.styleClass.add("region")
-                // Color set programmatically; no CSS class needed
                 group.children.add(polygon)
             }
         }
@@ -83,24 +80,20 @@ object GeometryRenderer {
             val isSelected = obj.id in selectedIds
             val isHovered = obj.id == hoveredId
 
-            val arcRadius = ANGLE_ARC_RADIUS * counterScale
-            // JavaFX Arc angles are in degrees, measured counter-clockwise from positive x-axis
-            // But our world group has y-flipped (myy=-1), so JavaFX CCW becomes CW visually
-            // Our startAngleRadians is the angle of ray BA, sweepAngleRadians is the CW sweep
-            // In JavaFX coords (with y-flip), CW sweep = negative JavaFX sweep
-            val startDeg = -obj.startAngleRadians * 180.0 / PI // negate for y-flip
-            val sweepDeg = obj.sweepAngleRadians * 180.0 / PI // positive = CW visual after y-flip
+            val arcRadius = StyleSettings.angleArcRadius(meta.size) * counterScale
+            val startDeg = -obj.startAngleRadians * 180.0 / PI
+            val sweepDeg = obj.sweepAngleRadians * 180.0 / PI
 
             val arc = Arc(obj.vertexX, obj.vertexY, arcRadius, arcRadius, startDeg, sweepDeg)
             arc.type = ArcType.ROUND
+            val objColorHex = StyleSettings.colorToHex(meta.color)
             arc.fill = when {
                 isSelected || isHovered -> Color.web("#2196F3", 0.5)
-                else -> ANGLE_FILL
+                else -> Color.web(objColorHex, 0.3)
             }
-            arc.stroke = if (isSelected) SELECTED_COLOR else if (isHovered) HOVER_COLOR else Color.web("#4CAF50", 0.7)
+            arc.stroke = if (isSelected) SELECTED_COLOR else if (isHovered) HOVER_COLOR else Color.web(objColorHex, 0.7)
             arc.strokeWidth = 1.0 * counterScale
             arc.styleClass.add("angle")
-            // Color set programmatically; no CSS class needed
             group.children.add(arc)
         }
 
@@ -110,12 +103,14 @@ object GeometryRenderer {
             if (!isRenderable(meta) || !obj.isDefined) continue
             val isSelected = obj.id in selectedIds
             val isHovered = obj.id == hoveredId
+            val objStrokeWidth = StyleSettings.strokeThicknessPixels(meta.strokeThickness)
             val color = when {
                 isSelected -> SELECTED_COLOR
                 isHovered -> HOVER_COLOR
-                else -> Color.BLACK
+                else -> Color.web(StyleSettings.colorToHex(meta.color))
             }
-            val strokeWidth = if (isHovered && !isSelected) STROKE_WIDTH * 1.5 * counterScale else STROKE_WIDTH * counterScale
+            val strokeWidth = if (isHovered && !isSelected) objStrokeWidth * 1.5 * counterScale else objStrokeWidth * counterScale
+            val isDashed = meta.strokeStyle == "dashed"
 
             if (obj is LinearLike) {
                 val dx = obj.x2 - obj.x1
@@ -130,6 +125,7 @@ object GeometryRenderer {
                         val line = FxLine(obj.x1, obj.y1, obj.x2, obj.y2)
                         line.strokeWidth = strokeWidth
                         line.stroke = color
+                        if (isDashed) line.strokeDashArray.addAll(6.0 * counterScale, 4.0 * counterScale)
                         line.styleClass.add("segment")
                         group.children.add(line)
                     }
@@ -143,6 +139,7 @@ object GeometryRenderer {
                             val line = FxLine(clipped[0], clipped[1], clipped[2], clipped[3])
                             line.strokeWidth = strokeWidth
                             line.stroke = color
+                            if (isDashed) line.strokeDashArray.addAll(6.0 * counterScale, 4.0 * counterScale)
                             line.styleClass.add("line")
                             group.children.add(line)
                             val cdx = clipped[2] - clipped[0]
@@ -156,6 +153,7 @@ object GeometryRenderer {
                             val line = FxLine(ex1, ey1, ex2, ey2)
                             line.strokeWidth = strokeWidth
                             line.stroke = color
+                            if (isDashed) line.strokeDashArray.addAll(6.0 * counterScale, 4.0 * counterScale)
                             line.styleClass.add("line")
                             group.children.add(line)
                             if (clipRect == null) {
@@ -172,6 +170,7 @@ object GeometryRenderer {
                             val line = FxLine(clipped[0], clipped[1], clipped[2], clipped[3])
                             line.strokeWidth = strokeWidth
                             line.stroke = color
+                            if (isDashed) line.strokeDashArray.addAll(6.0 * counterScale, 4.0 * counterScale)
                             line.styleClass.add("ray")
                             group.children.add(line)
                             val cdx = clipped[2] - clipped[0]
@@ -184,6 +183,7 @@ object GeometryRenderer {
                             val line = FxLine(obj.x1, obj.y1, ex, ey)
                             line.strokeWidth = strokeWidth
                             line.stroke = color
+                            if (isDashed) line.strokeDashArray.addAll(6.0 * counterScale, 4.0 * counterScale)
                             line.styleClass.add("ray")
                             group.children.add(line)
                             if (clipRect == null) {
@@ -193,7 +193,7 @@ object GeometryRenderer {
                     }
                 }
             } else if (obj is Circle) {
-                addClippedCircle(group, obj.cx, obj.cy, obj.radius, strokeWidth, color, clipRect)
+                addClippedCircle(group, obj.cx, obj.cy, obj.radius, strokeWidth, color, clipRect, strokeStyle = meta.strokeStyle, counterScale = counterScale)
             }
         }
 
@@ -204,12 +204,13 @@ object GeometryRenderer {
             if (!isRenderable(meta)) continue
             val isSelected = obj.id in selectedIds
             val isHovered = obj.id == hoveredId
+            val objRadius = StyleSettings.pointRadius(meta.size)
             val color = when {
                 isSelected -> SELECTED_COLOR
                 isHovered -> HOVER_COLOR
-                else -> Color.BLACK
+                else -> Color.web(StyleSettings.colorToHex(meta.color))
             }
-            val radius = if (isHovered && !isSelected) POINT_RADIUS * 1.3 * counterScale else POINT_RADIUS * counterScale
+            val radius = if (isHovered && !isSelected) objRadius * 1.3 * counterScale else objRadius * counterScale
             val ptCircle = FxCircle(obj.x, obj.y, radius)
             ptCircle.fill = color
             ptCircle.styleClass.add("point")
@@ -270,7 +271,7 @@ object GeometryRenderer {
         // Pass 2: Angles
         for (obj in objects) {
             if (obj !is Angle || !obj.isDefined) continue
-            val arcRadius = ANGLE_ARC_RADIUS * counterScale
+            val arcRadius = GeometryUtils.ANGLE_ARC_RADIUS * counterScale
             val startDeg = -obj.startAngleRadians * 180.0 / PI
             val sweepDeg = obj.sweepAngleRadians * 180.0 / PI
             val arc = Arc(obj.vertexX, obj.vertexY, arcRadius, arcRadius, startDeg, sweepDeg)
@@ -393,29 +394,33 @@ object GeometryRenderer {
         strokeWidth: Double, color: Color,
         clipRect: DoubleArray?,
         opacity: Double = 1.0,
-        mouseTransparent: Boolean = false
+        mouseTransparent: Boolean = false,
+        strokeStyle: String = "solid",
+        counterScale: Double = 1.0
     ) {
+        val applyDash: (javafx.scene.shape.Shape) -> Unit = { shape ->
+            if (strokeStyle == "dashed") shape.strokeDashArray.addAll(6.0 * counterScale, 4.0 * counterScale)
+        }
         if (clipRect != null) {
             val arcs = GeometryUtils.clipCircleToArcs(cx, cy, radius, clipRect[0], clipRect[1], clipRect[2], clipRect[3])
             if (arcs.isEmpty()) return
-            // Check if it's a full circle (single arc with 360 sweep)
             if (arcs.size == 1 && abs(arcs[0][1] - 360.0) < 0.01) {
                 val circle = FxCircle(cx, cy, radius)
                 circle.fill = Color.TRANSPARENT
                 circle.strokeWidth = strokeWidth
                 circle.stroke = color
+                applyDash(circle)
                 if (opacity < 1.0) circle.opacity = opacity
                 if (mouseTransparent) circle.isMouseTransparent = true
                 group.children.add(circle)
             } else {
                 for (arcDef in arcs) {
-                    // clipCircleToArcs returns angles in math convention (CCW from +x).
-                    // In the y-flipped world group, JavaFX Arc angles need negation.
                     val arc = Arc(cx, cy, radius, radius, -arcDef[0], -arcDef[1])
                     arc.type = ArcType.OPEN
                     arc.fill = Color.TRANSPARENT
                     arc.strokeWidth = strokeWidth
                     arc.stroke = color
+                    applyDash(arc)
                     if (opacity < 1.0) arc.opacity = opacity
                     if (mouseTransparent) arc.isMouseTransparent = true
                     group.children.add(arc)
@@ -426,6 +431,7 @@ object GeometryRenderer {
             circle.fill = Color.TRANSPARENT
             circle.strokeWidth = strokeWidth
             circle.stroke = color
+            applyDash(circle)
             if (opacity < 1.0) circle.opacity = opacity
             if (mouseTransparent) circle.isMouseTransparent = true
             group.children.add(circle)

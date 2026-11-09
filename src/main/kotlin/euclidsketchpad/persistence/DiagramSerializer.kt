@@ -31,7 +31,11 @@ data class SerializedMetadata(
     val labelAnchorAngle: Double? = null,
     val labelAnchorT: Double? = null,
     val isInput: Boolean = false,
-    val isLocked: Boolean = false
+    val isLocked: Boolean = false,
+    val color: String? = null,
+    val size: String? = null,
+    val strokeStyle: String? = null,
+    val strokeThickness: String? = null
 )
 
 @Serializable
@@ -74,7 +78,11 @@ object DiagramSerializer {
                 labelAnchorAngle = meta.labelAnchorAngle,
                 labelAnchorT = meta.labelAnchorT,
                 isInput = meta.isInput,
-                isLocked = meta.isLocked
+                isLocked = meta.isLocked,
+                color = meta.color,
+                size = meta.size,
+                strokeStyle = meta.strokeStyle,
+                strokeThickness = meta.strokeThickness
             )
         }.mapKeys { it.key.toString() }.let {
             // Convert to Map<Int, SerializedMetadata>
@@ -108,6 +116,14 @@ object DiagramSerializer {
                     meta.labelAnchorT = sMeta.labelAnchorT
                     meta.isInput = sMeta.isInput
                     meta.isLocked = sMeta.isLocked
+                    meta.color = sMeta.color ?: when {
+                        obj is Angle -> "green"
+                        obj is Region -> "yellow"
+                        else -> "black"
+                    }
+                    meta.size = sMeta.size ?: "medium"
+                    meta.strokeStyle = sMeta.strokeStyle ?: "solid"
+                    meta.strokeThickness = sMeta.strokeThickness ?: "normal"
                 }
             }
         }

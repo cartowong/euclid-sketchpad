@@ -124,6 +124,26 @@ class ConstructionSerializerTest {
     }
 
     @Test
+    fun `save construction strips style fields`() {
+        val mgr = GeometricObjectManager()
+        val p1 = mgr.addObject { id -> FreePoint(id, 0.0, 0.0) }
+        mgr.getMetadata(p1.id)!!.isInput = true
+        mgr.getMetadata(p1.id)!!.color = "red"
+        mgr.getMetadata(p1.id)!!.size = "large"
+
+        val file = File(tempDir, "styled.json")
+        ConstructionSerializer.saveConstruction(mgr, file)
+
+        val loaded = ConstructionSerializer.loadFromFile(file)
+        val meta = loaded.diagram.metadata[p1.id]!!
+        // Style fields should be null (stripped)
+        assertEquals(null, meta.color)
+        assertEquals(null, meta.size)
+        assertEquals(null, meta.strokeStyle)
+        assertEquals(null, meta.strokeThickness)
+    }
+
+    @Test
     fun `non-point input types displayed as exact type`() {
         val mgr = GeometricObjectManager()
         val p1 = mgr.addObject { id -> FreePoint(id, 0.0, 0.0) }

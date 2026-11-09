@@ -15,7 +15,11 @@ data class ObjectMetadata(
     var labelAnchorAngle: Double? = null,
     var labelAnchorT: Double? = null,
     var isInput: Boolean = false,
-    var isLocked: Boolean = false
+    var isLocked: Boolean = false,
+    var color: String = "black",
+    var size: String = "medium",
+    var strokeStyle: String = "solid",
+    var strokeThickness: String = "normal"
 )
 
 fun getObjectAnchor(obj: GeometricObject, meta: ObjectMetadata? = null): Pair<Double, Double>? {

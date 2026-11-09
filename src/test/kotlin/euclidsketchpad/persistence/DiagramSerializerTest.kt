@@ -202,6 +202,65 @@ class DiagramSerializerTest {
     }
 
     @Test
+    fun `round trip preserves style fields`() {
+        val mgr1 = GeometricObjectManager()
+        mgr1.addObject { id -> FreePoint(id, 0.0, 0.0) }
+        mgr1.getMetadata(0)!!.color = "red"
+        mgr1.getMetadata(0)!!.size = "large"
+
+        mgr1.addObject { id -> FreePoint(id, 1.0, 0.0) }
+        mgr1.addObject { id -> Segment(id, 0, 1) }
+        mgr1.getMetadata(2)!!.color = "purple"
+        mgr1.getMetadata(2)!!.strokeStyle = "dashed"
+        mgr1.getMetadata(2)!!.strokeThickness = "thick"
+
+        val json = DiagramSerializer.serialize(mgr1)
+
+        val mgr2 = GeometricObjectManager()
+        DiagramSerializer.deserialize(json, mgr2)
+
+        val pointMeta = mgr2.getMetadata(0)!!
+        assertEquals("red", pointMeta.color)
+        assertEquals("large", pointMeta.size)
+
+        val segMeta = mgr2.getMetadata(2)!!
+        assertEquals("purple", segMeta.color)
+        assertEquals("dashed", segMeta.strokeStyle)
+        assertEquals("thick", segMeta.strokeThickness)
+    }
+
+    @Test
+    fun `backward compat - angle gets green, region gets yellow when style fields missing`() {
+        val json = """
+            {
+                "appName": "EuclidSketchpad",
+                "version": "2.0",
+                "objects": [
+                    {"id": 0, "type": "FreePoint", "x": 1.0, "y": 0.0},
+                    {"id": 1, "type": "FreePoint", "x": 0.0, "y": 0.0},
+                    {"id": 2, "type": "FreePoint", "x": 0.0, "y": 1.0},
+                    {"id": 3, "type": "Angle", "parentIds": [0, 1, 2]},
+                    {"id": 4, "type": "FreePoint", "x": 1.0, "y": 1.0},
+                    {"id": 5, "type": "Region", "pointIds": [0, 1, 2, 4]}
+                ],
+                "metadata": {
+                    "0": {}, "1": {}, "2": {}, "3": {}, "4": {}, "5": {}
+                }
+            }
+        """.trimIndent()
+
+        val mgr = GeometricObjectManager()
+        DiagramSerializer.deserialize(json, mgr)
+
+        // Point should get default black
+        assertEquals("black", mgr.getMetadata(0)!!.color)
+        // Angle should get green
+        assertEquals("green", mgr.getMetadata(3)!!.color)
+        // Region should get yellow
+        assertEquals("yellow", mgr.getMetadata(5)!!.color)
+    }
+
+    @Test
     fun `round trip preserves intersection with sign`() {
         val mgr1 = GeometricObjectManager()
         mgr1.addObject { id -> FreePoint(id, 0.0, 0.0) }

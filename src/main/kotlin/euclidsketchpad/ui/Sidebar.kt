@@ -38,6 +38,7 @@ class Sidebar(
     var onCloseObjectList: (() -> Unit)? = null
     var onCloseConstructions: (() -> Unit)? = null
     var onCloseMeasurements: (() -> Unit)? = null
+    var onContextMenuRequested: ((Double, Double) -> Unit)? = null
 
     val leftPane: VBox
     val rightPane: VBox
@@ -115,6 +116,10 @@ class Sidebar(
 
         objectTable.setRowFactory {
             val row = TableRow<ObjectRow>()
+            row.setOnContextMenuRequested { event ->
+                onContextMenuRequested?.invoke(event.screenX, event.screenY)
+                event.consume()
+            }
             row.addEventFilter(MouseEvent.MOUSE_PRESSED) { event ->
                 if (event.button == MouseButton.PRIMARY && !row.isEmpty) {
                     // Let clicks on buttons, checkboxes, and text fields pass through

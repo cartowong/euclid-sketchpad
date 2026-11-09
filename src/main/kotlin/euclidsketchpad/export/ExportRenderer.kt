@@ -1,14 +1,12 @@
 package euclidsketchpad.export
 
 import euclidsketchpad.geometry.*
-import euclidsketchpad.geometry.GeometryUtils.ANGLE_ARC_RADIUS
 import euclidsketchpad.geometry.GeometryUtils.ARROWHEAD_SIZE
 import euclidsketchpad.geometry.GeometryUtils.FONT_SIZE
 import euclidsketchpad.geometry.GeometryUtils.LINE_EXTENT
-import euclidsketchpad.geometry.GeometryUtils.POINT_RADIUS
-import euclidsketchpad.geometry.GeometryUtils.STROKE_WIDTH
 import euclidsketchpad.model.GeometricObjectManager
 import euclidsketchpad.model.ObjectMetadata
+import euclidsketchpad.model.StyleSettings
 import euclidsketchpad.model.getObjectAnchor
 import javafx.embed.swing.SwingFXUtils
 import javafx.geometry.Rectangle2D
@@ -210,7 +208,7 @@ object ExportRenderer {
                     coords[i * 2 + 1] = ty(obj.vertices[i].second)
                 }
                 val polygon = FxPolygon(*coords)
-                polygon.fill = Color.web("#FFEB3B", 0.3)
+                polygon.fill = Color.web(StyleSettings.colorToHex(meta.color), 0.3)
                 polygon.stroke = null
                 group.children.add(polygon)
             }
@@ -222,20 +220,18 @@ object ExportRenderer {
             val meta = manager.getMetadata(obj.id) ?: continue
             if (!isExportable(meta)) continue
 
-            val arcRadius = ANGLE_ARC_RADIUS
+            val arcRadius = StyleSettings.angleArcRadius(meta.size)
             val cx = tx(obj.vertexX)
             val cy = ty(obj.vertexY)
+            val colorHex = StyleSettings.colorToHex(meta.color)
 
-            // Export has no y-flip transform (ty() handles flipping positions), so
-            // JavaFX Arc angles map directly to math angles. Negate sweep because
-            // JavaFX Arc sweeps CCW for positive values but our sweep is CW in math.
             val startDeg = obj.startAngleRadians * 180.0 / PI
             val sweepDeg = -obj.sweepAngleRadians * 180.0 / PI
 
             val arc = Arc(cx, cy, arcRadius, arcRadius, startDeg, sweepDeg)
             arc.type = ArcType.ROUND
-            arc.fill = Color.web("#4CAF50", 0.3)
-            arc.stroke = Color.web("#4CAF50", 0.7)
+            arc.fill = Color.web(colorHex, 0.3)
+            arc.stroke = Color.web(colorHex, 0.7)
             arc.strokeWidth = 1.0
             group.children.add(arc)
         }
@@ -244,6 +240,10 @@ object ExportRenderer {
         for (obj in manager.allObjects()) {
             val meta = manager.getMetadata(obj.id) ?: continue
             if (!isExportable(meta) || !obj.isDefined) continue
+
+            val objColor = Color.web(StyleSettings.colorToHex(meta.color))
+            val objStrokeWidth = StyleSettings.strokeThicknessPixels(meta.strokeThickness)
+            val isDashed = meta.strokeStyle == "dashed"
 
             if (obj is LinearLike) {
                 val dx = obj.x2 - obj.x1
@@ -256,8 +256,9 @@ object ExportRenderer {
                 when (obj.linearType) {
                     LinearType.SEGMENT -> {
                         val line = FxLine(tx(obj.x1), ty(obj.y1), tx(obj.x2), ty(obj.y2))
-                        line.strokeWidth = STROKE_WIDTH
-                        line.stroke = Color.BLACK
+                        line.strokeWidth = objStrokeWidth
+                        line.stroke = objColor
+                        if (isDashed) line.strokeDashArray.addAll(6.0, 4.0)
                         group.children.add(line)
                     }
                     LinearType.LINE -> {
@@ -268,15 +269,16 @@ object ExportRenderer {
                         val clipped = GeometryUtils.clipLineToRect(ex1, ey1, ex2, ey2, mathClipRect[0], mathClipRect[1], mathClipRect[2], mathClipRect[3])
                         if (clipped != null) {
                             val line = FxLine(tx(clipped[0]), ty(clipped[1]), tx(clipped[2]), ty(clipped[3]))
-                            line.strokeWidth = STROKE_WIDTH
-                            line.stroke = Color.BLACK
+                            line.strokeWidth = objStrokeWidth
+                            line.stroke = objColor
+                            if (isDashed) line.strokeDashArray.addAll(6.0, 4.0)
                             group.children.add(line)
                             val adx = tx(clipped[2]) - tx(clipped[0])
                             val ady = ty(clipped[3]) - ty(clipped[1])
                             val alen = hypot(adx, ady)
                             if (alen > 0) {
-                                addArrowheadPng(group, tx(clipped[2]), ty(clipped[3]), adx / alen, ady / alen)
-                                addArrowheadPng(group, tx(clipped[0]), ty(clipped[1]), -adx / alen, -ady / alen)
+                                addArrowheadPng(group, tx(clipped[2]), ty(clipped[3]), adx / alen, ady / alen, objColor)
+                                addArrowheadPng(group, tx(clipped[0]), ty(clipped[1]), -adx / alen, -ady / alen, objColor)
                             }
                         }
                     }
@@ -286,20 +288,21 @@ object ExportRenderer {
                         val clipped = GeometryUtils.clipLineToRect(obj.x1, obj.y1, ex, ey, mathClipRect[0], mathClipRect[1], mathClipRect[2], mathClipRect[3])
                         if (clipped != null) {
                             val line = FxLine(tx(clipped[0]), ty(clipped[1]), tx(clipped[2]), ty(clipped[3]))
-                            line.strokeWidth = STROKE_WIDTH
-                            line.stroke = Color.BLACK
+                            line.strokeWidth = objStrokeWidth
+                            line.stroke = objColor
+                            if (isDashed) line.strokeDashArray.addAll(6.0, 4.0)
                             group.children.add(line)
                             val adx = tx(clipped[2]) - tx(clipped[0])
                             val ady = ty(clipped[3]) - ty(clipped[1])
                             val alen = hypot(adx, ady)
                             if (alen > 0) {
-                                addArrowheadPng(group, tx(clipped[2]), ty(clipped[3]), adx / alen, ady / alen)
+                                addArrowheadPng(group, tx(clipped[2]), ty(clipped[3]), adx / alen, ady / alen, objColor)
                             }
                         }
                     }
                 }
             } else if (obj is Circle) {
-                addClippedCirclePng(group, obj.cx, obj.cy, obj.radius, mathClipRect, scale, tx, ty)
+                addClippedCirclePng(group, obj.cx, obj.cy, obj.radius, mathClipRect, scale, tx, ty, objColor, objStrokeWidth, meta.strokeStyle)
             }
         }
 
@@ -308,15 +311,12 @@ object ExportRenderer {
             if (obj !is PointLike || !obj.isDefined) continue
             val meta = manager.getMetadata(obj.id) ?: continue
             if (!isExportable(meta)) continue
-            val circle = FxCircle(tx(obj.x), ty(obj.y), POINT_RADIUS)
-            circle.fill = Color.BLACK
+            val circle = FxCircle(tx(obj.x), ty(obj.y), StyleSettings.pointRadius(meta.size))
+            circle.fill = Color.web(StyleSettings.colorToHex(meta.color))
             group.children.add(circle)
         }
 
         // Pass 5: Labels
-        // On canvas, text.scaleY = -1 (to un-mirror text in the y-flipped world group) pivots
-        // around the layout bounds center, shifting the visual baseline by (ascent - descent) px.
-        // Replicate that shift here so export labels match canvas positions.
         val probe = Text("A").apply { font = Font.font(FONT_SIZE) }
         val baselineShift = -(probe.layoutBounds.minY + probe.layoutBounds.maxY)
         for (obj in manager.allObjects()) {
@@ -334,11 +334,11 @@ object ExportRenderer {
         }
     }
 
-    private fun addArrowheadPng(group: Group, tipX: Double, tipY: Double, dirX: Double, dirY: Double) {
+    private fun addArrowheadPng(group: Group, tipX: Double, tipY: Double, dirX: Double, dirY: Double, color: Color = Color.BLACK) {
         val v = GeometryUtils.computeArrowheadVertices(tipX, tipY, dirX, dirY, ARROWHEAD_SIZE)
         val arrow = FxPolygon(v[0], v[1], v[2], v[3], v[4], v[5])
-        arrow.fill = Color.BLACK
-        arrow.stroke = Color.BLACK
+        arrow.fill = color
+        arrow.stroke = color
         group.children.add(arrow)
     }
 
@@ -425,7 +425,8 @@ object ExportRenderer {
                 val points = obj.vertices.joinToString(" ") { (vx, vy) ->
                     "${fmt(tx(vx))},${fmt(ty(vy))}"
                 }
-                sb.appendLine("""  <polygon points="$points" fill="#FFEB3B" fill-opacity="0.3" stroke="none"/>""")
+                val colorHex = StyleSettings.colorToHex(meta.color)
+                sb.appendLine("""  <polygon points="$points" fill="$colorHex" fill-opacity="0.3" stroke="none"/>""")
             }
         }
 
@@ -437,10 +438,9 @@ object ExportRenderer {
 
             val cx = tx(obj.vertexX)
             val cy = ty(obj.vertexY)
-            val r = ANGLE_ARC_RADIUS
+            val r = StyleSettings.angleArcRadius(meta.size)
+            val colorHex = StyleSettings.colorToHex(meta.color)
 
-            // ty() flips y-positions but arc endpoint trig uses pixel-space angles.
-            // Negate startAngle so sin() yields the correct y-direction on screen.
             val startAngle = -obj.startAngleRadians
             val endAngle = startAngle + obj.sweepAngleRadians
 
@@ -450,16 +450,19 @@ object ExportRenderer {
             val y2 = cy + r * sin(endAngle)
 
             val largeArc = if (obj.sweepAngleRadians > PI) 1 else 0
-            // In pixel coords, CW sweep becomes CW in SVG, which is sweep-flag=1
             val sweepFlag = 1
 
-            sb.appendLine("""  <path d="M ${fmt(cx)} ${fmt(cy)} L ${fmt(x1)} ${fmt(y1)} A $r $r 0 $largeArc $sweepFlag ${fmt(x2)} ${fmt(y2)} Z" fill="#4CAF50" fill-opacity="0.3" stroke="#4CAF50" stroke-opacity="0.7" stroke-width="1"/>""")
+            sb.appendLine("""  <path d="M ${fmt(cx)} ${fmt(cy)} L ${fmt(x1)} ${fmt(y1)} A $r $r 0 $largeArc $sweepFlag ${fmt(x2)} ${fmt(y2)} Z" fill="$colorHex" fill-opacity="0.3" stroke="$colorHex" stroke-opacity="0.7" stroke-width="1"/>""")
         }
 
         // Pass 3: Lines/Rays/Segments/Circles
         for (obj in manager.allObjects()) {
             val meta = manager.getMetadata(obj.id) ?: continue
             if (!isExportable(meta) || !obj.isDefined) continue
+
+            val colorHex = StyleSettings.colorToHex(meta.color)
+            val sw = StyleSettings.strokeThicknessPixels(meta.strokeThickness)
+            val dashAttr = if (meta.strokeStyle == "dashed") """ stroke-dasharray="6 4"""" else ""
 
             if (obj is LinearLike) {
                 val dx = obj.x2 - obj.x1
@@ -471,7 +474,7 @@ object ExportRenderer {
 
                 when (obj.linearType) {
                     LinearType.SEGMENT -> {
-                        sb.appendLine("""  <line x1="${fmt(tx(obj.x1))}" y1="${fmt(ty(obj.y1))}" x2="${fmt(tx(obj.x2))}" y2="${fmt(ty(obj.y2))}" stroke="black" stroke-width="$STROKE_WIDTH"/>""")
+                        sb.appendLine("""  <line x1="${fmt(tx(obj.x1))}" y1="${fmt(ty(obj.y1))}" x2="${fmt(tx(obj.x2))}" y2="${fmt(ty(obj.y2))}" stroke="$colorHex" stroke-width="$sw"$dashAttr/>""")
                     }
                     LinearType.LINE -> {
                         val ex1 = obj.x1 - ux * LINE_EXTENT
@@ -480,13 +483,13 @@ object ExportRenderer {
                         val ey2 = obj.y1 + uy * LINE_EXTENT
                         val clipped = GeometryUtils.clipLineToRect(ex1, ey1, ex2, ey2, mathClipRect[0], mathClipRect[1], mathClipRect[2], mathClipRect[3])
                         if (clipped != null) {
-                            sb.appendLine("""  <line x1="${fmt(tx(clipped[0]))}" y1="${fmt(ty(clipped[1]))}" x2="${fmt(tx(clipped[2]))}" y2="${fmt(ty(clipped[3]))}" stroke="black" stroke-width="$STROKE_WIDTH"/>""")
+                            sb.appendLine("""  <line x1="${fmt(tx(clipped[0]))}" y1="${fmt(ty(clipped[1]))}" x2="${fmt(tx(clipped[2]))}" y2="${fmt(ty(clipped[3]))}" stroke="$colorHex" stroke-width="$sw"$dashAttr/>""")
                             val adx = tx(clipped[2]) - tx(clipped[0])
                             val ady = ty(clipped[3]) - ty(clipped[1])
                             val alen = hypot(adx, ady)
                             if (alen > 0) {
-                                addArrowheadSvg(sb, tx(clipped[2]), ty(clipped[3]), adx / alen, ady / alen)
-                                addArrowheadSvg(sb, tx(clipped[0]), ty(clipped[1]), -adx / alen, -ady / alen)
+                                addArrowheadSvg(sb, tx(clipped[2]), ty(clipped[3]), adx / alen, ady / alen, colorHex)
+                                addArrowheadSvg(sb, tx(clipped[0]), ty(clipped[1]), -adx / alen, -ady / alen, colorHex)
                             }
                         }
                     }
@@ -495,18 +498,18 @@ object ExportRenderer {
                         val ey = obj.y1 + uy * LINE_EXTENT
                         val clipped = GeometryUtils.clipLineToRect(obj.x1, obj.y1, ex, ey, mathClipRect[0], mathClipRect[1], mathClipRect[2], mathClipRect[3])
                         if (clipped != null) {
-                            sb.appendLine("""  <line x1="${fmt(tx(clipped[0]))}" y1="${fmt(ty(clipped[1]))}" x2="${fmt(tx(clipped[2]))}" y2="${fmt(ty(clipped[3]))}" stroke="black" stroke-width="$STROKE_WIDTH"/>""")
+                            sb.appendLine("""  <line x1="${fmt(tx(clipped[0]))}" y1="${fmt(ty(clipped[1]))}" x2="${fmt(tx(clipped[2]))}" y2="${fmt(ty(clipped[3]))}" stroke="$colorHex" stroke-width="$sw"$dashAttr/>""")
                             val adx = tx(clipped[2]) - tx(clipped[0])
                             val ady = ty(clipped[3]) - ty(clipped[1])
                             val alen = hypot(adx, ady)
                             if (alen > 0) {
-                                addArrowheadSvg(sb, tx(clipped[2]), ty(clipped[3]), adx / alen, ady / alen)
+                                addArrowheadSvg(sb, tx(clipped[2]), ty(clipped[3]), adx / alen, ady / alen, colorHex)
                             }
                         }
                     }
                 }
             } else if (obj is Circle) {
-                addClippedCircleSvg(sb, obj.cx, obj.cy, obj.radius, mathClipRect, scale, tx, ty)
+                addClippedCircleSvg(sb, obj.cx, obj.cy, obj.radius, mathClipRect, scale, tx, ty, colorHex, sw, meta.strokeStyle)
             }
         }
 
@@ -515,7 +518,9 @@ object ExportRenderer {
             if (obj !is PointLike || !obj.isDefined) continue
             val meta = manager.getMetadata(obj.id) ?: continue
             if (!isExportable(meta)) continue
-            sb.appendLine("""  <circle cx="${fmt(tx(obj.x))}" cy="${fmt(ty(obj.y))}" r="$POINT_RADIUS" fill="black"/>""")
+            val r = StyleSettings.pointRadius(meta.size)
+            val colorHex = StyleSettings.colorToHex(meta.color)
+            sb.appendLine("""  <circle cx="${fmt(tx(obj.x))}" cy="${fmt(ty(obj.y))}" r="$r" fill="$colorHex"/>""")
         }
 
         // Pass 5: Labels (same baseline shift as PNG — see comment there)
@@ -534,9 +539,9 @@ object ExportRenderer {
         }
     }
 
-    private fun addArrowheadSvg(sb: StringBuilder, tipX: Double, tipY: Double, dirX: Double, dirY: Double) {
+    private fun addArrowheadSvg(sb: StringBuilder, tipX: Double, tipY: Double, dirX: Double, dirY: Double, color: String = "black") {
         val v = GeometryUtils.computeArrowheadVertices(tipX, tipY, dirX, dirY, ARROWHEAD_SIZE)
-        sb.appendLine("""  <polygon points="${fmt(v[0])},${fmt(v[1])} ${fmt(v[2])},${fmt(v[3])} ${fmt(v[4])},${fmt(v[5])}" fill="black"/>""")
+        sb.appendLine("""  <polygon points="${fmt(v[0])},${fmt(v[1])} ${fmt(v[2])},${fmt(v[3])} ${fmt(v[4])},${fmt(v[5])}" fill="$color"/>""")
     }
 
     // --- Circle clipping helpers ---
@@ -546,7 +551,10 @@ object ExportRenderer {
         cx: Double, cy: Double, radius: Double,
         mathClipRect: DoubleArray,
         scale: Double,
-        tx: (Double) -> Double, ty: (Double) -> Double
+        tx: (Double) -> Double, ty: (Double) -> Double,
+        color: Color = Color.BLACK,
+        strokeWidth: Double = GeometryUtils.STROKE_WIDTH,
+        strokeStyle: String = "solid"
     ) {
         val arcs = GeometryUtils.clipCircleToArcs(cx, cy, radius, mathClipRect[0], mathClipRect[1], mathClipRect[2], mathClipRect[3])
         if (arcs.isEmpty()) return
@@ -554,22 +562,23 @@ object ExportRenderer {
         val pixelRadius = radius * scale
         val pcx = tx(cx)
         val pcy = ty(cy)
+        val isDashed = strokeStyle == "dashed"
 
         if (arcs.size == 1 && kotlin.math.abs(arcs[0][1] - 360.0) < 0.01) {
             val circle = FxCircle(pcx, pcy, pixelRadius)
             circle.fill = Color.TRANSPARENT
-            circle.strokeWidth = STROKE_WIDTH
-            circle.stroke = Color.BLACK
+            circle.strokeWidth = strokeWidth
+            circle.stroke = color
+            if (isDashed) circle.strokeDashArray.addAll(6.0, 4.0)
             group.children.add(circle)
         } else {
             for (arcDef in arcs) {
-                // Export has no y-flip transform (ty() already flips), so negate angles
-                // to convert from math convention to pixel y-down convention.
                 val arc = Arc(pcx, pcy, pixelRadius, pixelRadius, -arcDef[0], -arcDef[1])
                 arc.type = ArcType.OPEN
                 arc.fill = Color.TRANSPARENT
-                arc.strokeWidth = STROKE_WIDTH
-                arc.stroke = Color.BLACK
+                arc.strokeWidth = strokeWidth
+                arc.stroke = color
+                if (isDashed) arc.strokeDashArray.addAll(6.0, 4.0)
                 group.children.add(arc)
             }
         }
@@ -580,7 +589,10 @@ object ExportRenderer {
         cx: Double, cy: Double, radius: Double,
         mathClipRect: DoubleArray,
         scale: Double,
-        tx: (Double) -> Double, ty: (Double) -> Double
+        tx: (Double) -> Double, ty: (Double) -> Double,
+        color: String = "black",
+        strokeWidth: Double = GeometryUtils.STROKE_WIDTH,
+        strokeStyle: String = "solid"
     ) {
         val arcs = GeometryUtils.clipCircleToArcs(cx, cy, radius, mathClipRect[0], mathClipRect[1], mathClipRect[2], mathClipRect[3])
         if (arcs.isEmpty()) return
@@ -588,14 +600,14 @@ object ExportRenderer {
         val cr = radius * scale
         val pcx = tx(cx)
         val pcy = ty(cy)
+        val dashAttr = if (strokeStyle == "dashed") """ stroke-dasharray="6 4"""" else ""
 
         if (arcs.size == 1 && kotlin.math.abs(arcs[0][1] - 360.0) < 0.01) {
-            sb.appendLine("""  <circle cx="${fmt(pcx)}" cy="${fmt(pcy)}" r="${fmt(cr)}" fill="none" stroke="black" stroke-width="$STROKE_WIDTH"/>""")
+            sb.appendLine("""  <circle cx="${fmt(pcx)}" cy="${fmt(pcy)}" r="${fmt(cr)}" fill="none" stroke="$color" stroke-width="$strokeWidth"$dashAttr/>""")
         } else {
             for (arcDef in arcs) {
                 val startRad = arcDef[0] * PI / 180.0
                 val sweepRad = arcDef[1] * PI / 180.0
-                // Start point in math coords, then transform to pixel coords
                 val sx = cx + radius * cos(startRad)
                 val sy = cy + radius * sin(startRad)
                 val ex = cx + radius * cos(startRad + sweepRad)
@@ -603,10 +615,8 @@ object ExportRenderer {
                 val psx = tx(sx); val psy = ty(sy)
                 val pex = tx(ex); val pey = ty(ey)
                 val largeArc = if (arcDef[1] > 180.0) 1 else 0
-                // In SVG y-down pixel coords, a math CCW arc maps to sweep-flag=0
-                // (because ty flips y, reversing the winding)
                 val sweepFlag = 0
-                sb.appendLine("""  <path d="M ${fmt(psx)} ${fmt(psy)} A ${fmt(cr)} ${fmt(cr)} 0 $largeArc $sweepFlag ${fmt(pex)} ${fmt(pey)}" fill="none" stroke="black" stroke-width="$STROKE_WIDTH"/>""")
+                sb.appendLine("""  <path d="M ${fmt(psx)} ${fmt(psy)} A ${fmt(cr)} ${fmt(cr)} 0 $largeArc $sweepFlag ${fmt(pex)} ${fmt(pey)}" fill="none" stroke="$color" stroke-width="$strokeWidth"$dashAttr/>""")
             }
         }
     }

@@ -2,6 +2,7 @@ package euclidsketchpad.ui
 
 import euclidsketchpad.geometry.*
 import euclidsketchpad.model.GeometricObjectManager
+import euclidsketchpad.model.StyleSettings
 import javafx.geometry.Point2D
 import javafx.scene.transform.Affine
 import kotlin.math.abs
@@ -127,11 +128,12 @@ class HitTester(
 
         // Tier 2: Angle objects (point inside arc sector)
         val scale = abs(transform.mxx)
-        val arcRadiusWorld = if (scale > 0) GeometryUtils.ANGLE_ARC_RADIUS / scale else GeometryUtils.ANGLE_ARC_RADIUS
         for (obj in manager.allObjects()) {
             if (obj is Angle && obj.isDefined) {
                 val meta = manager.getMetadata(obj.id)
                 if (meta != null && (!meta.visible || meta.isLocked)) continue
+                val arcPx = StyleSettings.angleArcRadius(meta?.size ?: "medium")
+                val arcRadiusWorld = if (scale > 0) arcPx / scale else arcPx
                 if (obj.containsPoint(wx, wy, arcRadiusWorld)) return HitResult.OnAngle(obj.id)
             }
         }
