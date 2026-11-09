@@ -438,7 +438,7 @@ All File menu items are disabled during construction recording.
 | *(separator)* | | |
 | Show | ⌘⇧I | Make selected objects visible |
 | Hide | ⌘I | Hide selected objects (also hides their labels) |
-| Delete | ⌘D | Delete selected objects and descendants (with confirmation) |
+| Delete | Del | Delete selected objects and descendants (with confirmation) |
 | *(separator)* | | |
 | Undo | ⌘Z | Undo |
 | Redo | ⌘⇧Z | Redo |

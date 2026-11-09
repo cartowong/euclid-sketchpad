@@ -5,7 +5,7 @@ import euclidsketchpad.export.HeadlessExportApp
 import euclidsketchpad.ui.SketchpadApp
 
 const val APP_NAME = "EuclidSketchpad"
-const val APP_VERSION = "2.2.0"
+const val APP_VERSION = "2.3.0"
 
 fun main(args: Array<String>) {
     if (args.isNotEmpty() && args[0] == "--export") {

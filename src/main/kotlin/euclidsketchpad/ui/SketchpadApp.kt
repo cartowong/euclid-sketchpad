@@ -339,7 +339,7 @@ class SketchpadApp : Application() {
             }
         }
         val deleteItem = MenuItem("Delete")
-        deleteItem.accelerator = KeyCombination.valueOf("Shortcut+D")
+        deleteItem.accelerator = KeyCombination.valueOf("Delete")
         deleteItem.setOnAction {
             val ids = selectionTool.selectedIds.toList()
             if (ids.isEmpty()) return@setOnAction
