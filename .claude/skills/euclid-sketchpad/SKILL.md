@@ -1,6 +1,6 @@
 ---
 name: euclid-sketchpad
-description: Project skills for Euclid Sketchpad. Supports 5 actions — "deploy app" (version release), "export diagram" (headless PNG/SVG), "merge pr" (merge release PR and push tag), "save changes" (update docs and commit), "update screenshot" (copy app screenshot to GitHub Pages). Use when user says "deploy", "release", "cut a release", "export diagram", "merge release", "merge release pr", "save changes", "update screenshot", or invokes /euclid-sketchpad.
+description: Project skills for Euclid Sketchpad. Supports 4 actions — "deploy app" (version release), "export diagram" (headless PNG/SVG), "merge pr" (merge release PR and push tag), "update screenshot" (copy app screenshot to GitHub Pages). Use when user says "deploy", "release", "cut a release", "export diagram", "merge release", "merge release pr", "update screenshot", or invokes /euclid-sketchpad.
 allowed-tools: Bash(git tag *) Bash(git add *) Bash(git commit *) Bash(git push *) Bash(gh pr *) Bash(./gradlew *) Bash(ls *) Bash(git checkout *) Bash(git pull *) Bash(git branch *) Bash(git diff *) Bash(git log *) Bash(git status *) Bash(cp *)
 ---
 
@@ -15,7 +15,6 @@ Parse the user's input after the skill name to determine which action to run:
 | "deploy", "release" | [Deploy App](#deploy-app) |
 | "export" | [Export Diagram](#export-diagram) |
 | "merge" | [Merge Release PR](#merge-release-pr) |
-| "save" | [Save Changes](#save-changes) |
 | "update screenshot", "screenshot" | [Update Screenshot](#update-screenshot) |
 
 If the action is ambiguous or not provided, ask the user which action they want.
@@ -24,7 +23,7 @@ Pass any remaining text after the action keywords as input to that action (e.g. 
 
 ## Shared Principles
 
-These apply to **Deploy App** and **Save Changes** (any action that edits tracked files):
+These apply to **Deploy App**:
 
 - **No absolute paths.** Every path written to tracked files must be relative to the project root. Never write absolute filesystem paths (e.g. `/Users/...` or `/home/...`).
 - **Minimal, accurate updates.** Only change what is needed. Don't rewrite sections that are already correct.
@@ -67,7 +66,7 @@ Edit `src/main/kotlin/euclidsketchpad/Main.kt` — change the `APP_VERSION` cons
 
 #### 3. Review spec and handoff
 
-- Read `spec/SPEC.md` and `docs/HANDOFF.md`.
+- Read `docs/SPEC.md` and `docs/HANDOFF.md`.
 - Check whether recent changes have caused either to become stale:
   - New features or behavior not yet documented.
   - Sections that describe behavior differently from the current implementation.
@@ -187,62 +186,6 @@ git push origin --delete release/<version>
 ```
 
 If declined, skip this step.
-
----
-
-## Save Changes
-
-Update documentation to reflect this session's work and commit everything.
-
-### Steps
-
-#### 1. Gather context
-
-- Read `docs/HANDOFF.md`, `spec/SPEC.md`, and `docs/CHANGELOG.md`.
-- Run `git diff` and `git status` to see what changed this session.
-- Run `git log` from the last version tag to HEAD for recent committed changes.
-
-#### 2. Update `spec/SPEC.md`
-
-The spec is the **authoritative design reference**. Update if this session changed behavior the spec describes:
-
-- New features or object types not yet documented.
-- Sections that describe behavior differently from the current implementation.
-- New or changed hit-testing tiers, tool behaviors, menu items, rendering passes, etc.
-
-If the spec is already accurate, skip.
-
-#### 3. Update `docs/CHANGELOG.md`
-
-Add entries under the **current unreleased version section** (the topmost `## [x.y.z]` entry). If no unreleased section exists, create one with today's date above the previous release.
-
-- Group under `### Added`, `### Changed`, `### Fixed`, or `### Removed` (omit empty subsections).
-- Do NOT alter existing released version entries.
-- One line per change.
-
-#### 4. Update `docs/HANDOFF.md`
-
-The handoff is a **concise onboarding brief**, not a changelog. It covers only what the spec doesn't: build state, implementation-specific architecture decisions, and known issues.
-
-- `## Current State` — update build status, test count, branch, packaging version.
-- `## Architecture Notes` — add notes for new patterns/gotchas. Remove stale notes. Do NOT duplicate the spec.
-- `## Known Issues / Gaps` — remove fixed items, add new ones.
-
-Do NOT add session-by-session changelogs. Completed work belongs in git history and `CHANGELOG.md`.
-
-#### 5. Run tests
-
-Run `./gradlew clean test`. If any test fails, **stop** and report failures.
-
-#### 6. Stage and commit
-
-- `git add` all changed files by name. Do not use `git add -A` or `git add .`.
-- Commit with a message summarizing the session's work:
-  ```
-  <short summary of implementation changes>
-
-  Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
-  ```
 
 ---
 
