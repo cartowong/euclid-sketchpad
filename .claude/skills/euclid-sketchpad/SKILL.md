@@ -59,7 +59,7 @@ Edit `src/main/kotlin/euclidsketchpad/Main.kt` — change the `APP_VERSION` cons
 
 #### 2. Update CHANGELOG.md
 
-- Read `CHANGELOG.md`.
+- Read `docs/CHANGELOG.md`.
 - Add a new `## [<version>] - <today's date YYYY-MM-DD>` section **above** the previous version entry.
 - Populate from `git log` (last tag to HEAD) and `git diff`/`git status` (uncommitted changes).
 - Group under `### Added`, `### Changed`, `### Fixed`, or `### Removed` (omit empty subsections).
@@ -67,7 +67,7 @@ Edit `src/main/kotlin/euclidsketchpad/Main.kt` — change the `APP_VERSION` cons
 
 #### 3. Review spec and handoff
 
-- Read `spec/SPEC.md` and `handoff/HANDOFF.md`.
+- Read `spec/SPEC.md` and `docs/HANDOFF.md`.
 - Check whether recent changes have caused either to become stale:
   - New features or behavior not yet documented.
   - Sections that describe behavior differently from the current implementation.
@@ -198,7 +198,7 @@ Update documentation to reflect this session's work and commit everything.
 
 #### 1. Gather context
 
-- Read `handoff/HANDOFF.md`, `spec/SPEC.md`, and `CHANGELOG.md`.
+- Read `docs/HANDOFF.md`, `spec/SPEC.md`, and `docs/CHANGELOG.md`.
 - Run `git diff` and `git status` to see what changed this session.
 - Run `git log` from the last version tag to HEAD for recent committed changes.
 
@@ -212,7 +212,7 @@ The spec is the **authoritative design reference**. Update if this session chang
 
 If the spec is already accurate, skip.
 
-#### 3. Update `CHANGELOG.md`
+#### 3. Update `docs/CHANGELOG.md`
 
 Add entries under the **current unreleased version section** (the topmost `## [x.y.z]` entry). If no unreleased section exists, create one with today's date above the previous release.
 
@@ -220,7 +220,7 @@ Add entries under the **current unreleased version section** (the topmost `## [x
 - Do NOT alter existing released version entries.
 - One line per change.
 
-#### 4. Update `handoff/HANDOFF.md`
+#### 4. Update `docs/HANDOFF.md`
 
 The handoff is a **concise onboarding brief**, not a changelog. It covers only what the spec doesn't: build state, implementation-specific architecture decisions, and known issues.
 

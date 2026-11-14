@@ -1,2 +1,2 @@
 @spec/SPEC.md
-@handoff/HANDOFF.md
+@docs/HANDOFF.md
