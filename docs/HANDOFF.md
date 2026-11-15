@@ -1,6 +1,6 @@
 # Euclid Sketchpad — Handoff Document
 
-**Date:** 2026-11-08
+**Date:** 2026-11-14
 **Branch:** `main`
 
 ## Current State
@@ -9,7 +9,7 @@
 - **Git:** `.claude/` is gitignored.
 - **Runtime:** `./gradlew run` launches the full app.
 - **Headless export:** `./gradlew run --args="--export <diagram.json> [outDir]"` exports 6 files without opening the GUI.
-- **Packaging:** `./gradlew jpackage` produces `build/jpackage/EuclidSketchpad-2.3.0.dmg` (~35 MB). `./gradlew jpackageImage` builds just the `.app` (faster, for testing). Not code-signed.
+- **Packaging:** `./gradlew jpackage` produces `build/jpackage/EuclidSketchpad-2.4.0.dmg` (~35 MB). `./gradlew jpackageImage` builds just the `.app` (faster, for testing). Not code-signed.
 - **License:** GPL v3.0. Third-party notices for AtlantaFX (MIT), OpenJFX (GPL 2.0 + Classpath Exception), and kotlinx.serialization (Apache 2.0) are bundled in `src/main/resources/THIRD_PARTY_NOTICES` and viewable from the About dialog.
 - **Spec alignment:** All features described in `docs/SPEC.md` are implemented.
 - **GitHub Pages:** `docs/` contains a static site (landing page, privacy policy, support page) served from `main` branch via GitHub Pages at `https://cartowong.github.io/euclid-sketchpad/`. Images are copies of app assets to stay within the `/docs` serving root.
@@ -41,7 +41,7 @@
 - **Headless export requires JavaFX Application.** PNG export uses `Node.snapshot()`, which needs the JavaFX toolkit. `HeadlessExportApp` is a full `Application` subclass that receives args via a companion object static field (standard pattern since `Application.launch()` doesn't forward constructor args). `main()` in `Main.kt` dispatches to it when `--export` is the first arg; otherwise launches `SketchpadApp` as before — no behavior change for normal app launch.
 - **Export label offsets negate `labelOffsetY` and add a baseline shift.** The canvas renderer positions labels at `anchorY + offsetY` in world coordinates and applies `scaleY = -1` to un-mirror text — the visual flip implicitly inverts the offset direction and also shifts the visual baseline by `ascent - descent` pixels (due to JavaFX pivoting the scale around the layout bounds center). The export renderers use `ty()` (which already flips y mathematically), so they apply `ty(anchorY) - offsetY + baselineShift` where `baselineShift = -(layoutBounds.minY + layoutBounds.maxY)` to match the canvas visual position.
 
-- **Per-object styling uses `StyleSettings` and `ObjectMetadata` fields.** Each object has `color`, `size`, `strokeStyle`, and `strokeThickness` fields on `ObjectMetadata`. `StyleSettings` (in `model/StyleSettings.kt`) holds per-category defaults applied to new objects via `GeometricObjectManager.onObjectAdded`. The Style menu controls defaults; right-click context menu on canvas or object table changes styles on selected objects (same-category only). Renderers (`GeometryRenderer`, `ExportRenderer`) read per-object metadata for all 5 passes. `StyleSettings.colorToHex()`, `pointRadius()`, `angleArcRadius()`, `strokeThicknessPixels()` centralize value mappings. Serialization uses nullable fields with type-aware defaults for backward compatibility (old files without style fields get correct defaults: Angle→green, Region→yellow, all others→black). Construction files strip style fields on save.
+- **Per-object styling uses `StyleSettings` and `ObjectMetadata` fields.** Each object has `color`, `size`, `strokeStyle`, and `strokeThickness` fields on `ObjectMetadata`. `StyleSettings` (in `model/StyleSettings.kt`) holds per-category defaults applied to new objects via `GeometricObjectManager.onObjectAdded`. The Style menu is dual-purpose: when objects of the matching category are selected, it applies the style change to those objects' `ObjectMetadata` (with undo checkpoint and re-render); when nothing matching is selected, it updates the `StyleSettings` default for newly created objects. The right-click context menu on canvas or object table also changes styles on selected objects (same-category only). Renderers (`GeometryRenderer`, `ExportRenderer`) read per-object metadata for all 5 passes. `StyleSettings.colorToHex()`, `pointRadius()`, `angleArcRadius()`, `strokeThicknessPixels()` centralize value mappings. Serialization uses nullable fields with type-aware defaults for backward compatibility (old files without style fields get correct defaults: Angle→green, Region→yellow, all others→black). Construction files strip style fields on save.
 - **Angle hit-testing uses per-object arc radius.** `HitTester` reads `meta.size` for each angle to compute zoom-aware arc radius, matching the visual arc size set by the renderer.
 
 ## Known Issues / Gaps

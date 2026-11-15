@@ -469,9 +469,9 @@ All File menu items are disabled during construction recording.
 
 ### 8.4 Style Menu
 
-Controls the default styles applied to newly created objects. Located between the View and About menus. All items use radio menu items with checkmarks indicating the current setting. No keyboard shortcuts. The Style menu remains enabled during construction recording.
+Dual-purpose style control. When objects of the matching category are selected, applies the style change to those objects. When no matching objects are selected, changes the default style for newly created objects. Located between the View and About menus. All items use radio menu items with checkmarks indicating the current setting. No keyboard shortcuts. The Style menu remains enabled during construction recording.
 
-Not persisted across sessions — resets to defaults on each launch.
+Defaults are not persisted across sessions — reset on each launch.
 
 | Sub-menu | Properties | Default |
 |----------|-----------|---------|

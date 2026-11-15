@@ -750,14 +750,25 @@ class SketchpadApp : Application() {
         // --- Style Menu ---
         val styleMenu = Menu("Style")
 
-        fun colorSubMenu(label: String, getter: () -> String, setter: (String) -> Unit): Menu {
+        fun colorSubMenu(label: String, category: String, getter: () -> String, setter: (String) -> Unit): Menu {
             val menu = Menu(label)
             val group = ToggleGroup()
             for (name in StyleSettings.COLOR_MAP.keys) {
-                val item = RadioMenuItem(name.replaceFirstChar { it.uppercase() })
+                val item = RadioMenuItem(name.replaceFirstChar { ch -> ch.uppercase() })
                 item.toggleGroup = group
                 item.isSelected = getter() == name
-                item.setOnAction { setter(name) }
+                item.setOnAction {
+                    val matchingIds = selectionTool.selectedIds.filter { id ->
+                        manager.getObject(id)?.let { obj -> StyleSettings.categoryOf(obj) } == category
+                    }
+                    if (matchingIds.isNotEmpty()) {
+                        for (id in matchingIds) { manager.getMetadata(id)?.color = name }
+                        undoManager.checkpoint()
+                        requestRender()
+                    } else {
+                        setter(name)
+                    }
+                }
                 menu.items.add(item)
             }
             menu.setOnShowing {
@@ -771,14 +782,25 @@ class SketchpadApp : Application() {
             return menu
         }
 
-        fun sizeSubMenu(label: String, getter: () -> String, setter: (String) -> Unit): Menu {
+        fun sizeSubMenu(label: String, category: String, getter: () -> String, setter: (String) -> Unit): Menu {
             val menu = Menu(label)
             val group = ToggleGroup()
             for (size in listOf("small", "medium", "large")) {
-                val item = RadioMenuItem(size.replaceFirstChar { it.uppercase() })
+                val item = RadioMenuItem(size.replaceFirstChar { ch -> ch.uppercase() })
                 item.toggleGroup = group
                 item.isSelected = getter() == size
-                item.setOnAction { setter(size) }
+                item.setOnAction {
+                    val matchingIds = selectionTool.selectedIds.filter { id ->
+                        manager.getObject(id)?.let { obj -> StyleSettings.categoryOf(obj) } == category
+                    }
+                    if (matchingIds.isNotEmpty()) {
+                        for (id in matchingIds) { manager.getMetadata(id)?.size = size }
+                        undoManager.checkpoint()
+                        requestRender()
+                    } else {
+                        setter(size)
+                    }
+                }
                 menu.items.add(item)
             }
             menu.setOnShowing {
@@ -792,14 +814,25 @@ class SketchpadApp : Application() {
             return menu
         }
 
-        fun strokeStyleSubMenu(getter: () -> String, setter: (String) -> Unit): Menu {
+        fun strokeStyleSubMenu(category: String, getter: () -> String, setter: (String) -> Unit): Menu {
             val menu = Menu("Stroke Style")
             val group = ToggleGroup()
             for (style in listOf("solid", "dashed")) {
-                val item = RadioMenuItem(style.replaceFirstChar { it.uppercase() })
+                val item = RadioMenuItem(style.replaceFirstChar { ch -> ch.uppercase() })
                 item.toggleGroup = group
                 item.isSelected = getter() == style
-                item.setOnAction { setter(style) }
+                item.setOnAction {
+                    val matchingIds = selectionTool.selectedIds.filter { id ->
+                        manager.getObject(id)?.let { obj -> StyleSettings.categoryOf(obj) } == category
+                    }
+                    if (matchingIds.isNotEmpty()) {
+                        for (id in matchingIds) { manager.getMetadata(id)?.strokeStyle = style }
+                        undoManager.checkpoint()
+                        requestRender()
+                    } else {
+                        setter(style)
+                    }
+                }
                 menu.items.add(item)
             }
             menu.setOnShowing {
@@ -813,14 +846,25 @@ class SketchpadApp : Application() {
             return menu
         }
 
-        fun strokeThicknessSubMenu(getter: () -> String, setter: (String) -> Unit): Menu {
+        fun strokeThicknessSubMenu(category: String, getter: () -> String, setter: (String) -> Unit): Menu {
             val menu = Menu("Stroke Thickness")
             val group = ToggleGroup()
             for (thickness in listOf("thin", "normal", "thick")) {
-                val item = RadioMenuItem(thickness.replaceFirstChar { it.uppercase() })
+                val item = RadioMenuItem(thickness.replaceFirstChar { ch -> ch.uppercase() })
                 item.toggleGroup = group
                 item.isSelected = getter() == thickness
-                item.setOnAction { setter(thickness) }
+                item.setOnAction {
+                    val matchingIds = selectionTool.selectedIds.filter { id ->
+                        manager.getObject(id)?.let { obj -> StyleSettings.categoryOf(obj) } == category
+                    }
+                    if (matchingIds.isNotEmpty()) {
+                        for (id in matchingIds) { manager.getMetadata(id)?.strokeThickness = thickness }
+                        undoManager.checkpoint()
+                        requestRender()
+                    } else {
+                        setter(thickness)
+                    }
+                }
                 menu.items.add(item)
             }
             menu.setOnShowing {
@@ -836,33 +880,33 @@ class SketchpadApp : Application() {
 
         val pointStyleMenu = Menu("Point")
         pointStyleMenu.items.addAll(
-            colorSubMenu("Color", { styleSettings.pointColor }, { styleSettings.pointColor = it }),
-            sizeSubMenu("Size", { styleSettings.pointSize }, { styleSettings.pointSize = it })
+            colorSubMenu("Color", "Point", { styleSettings.pointColor }, { styleSettings.pointColor = it }),
+            sizeSubMenu("Size", "Point", { styleSettings.pointSize }, { styleSettings.pointSize = it })
         )
 
         val linearStyleMenu = Menu("Linear")
         linearStyleMenu.items.addAll(
-            colorSubMenu("Color", { styleSettings.linearColor }, { styleSettings.linearColor = it }),
-            strokeStyleSubMenu({ styleSettings.linearStrokeStyle }, { styleSettings.linearStrokeStyle = it }),
-            strokeThicknessSubMenu({ styleSettings.linearStrokeThickness }, { styleSettings.linearStrokeThickness = it })
+            colorSubMenu("Color", "Linear", { styleSettings.linearColor }, { styleSettings.linearColor = it }),
+            strokeStyleSubMenu("Linear", { styleSettings.linearStrokeStyle }, { styleSettings.linearStrokeStyle = it }),
+            strokeThicknessSubMenu("Linear", { styleSettings.linearStrokeThickness }, { styleSettings.linearStrokeThickness = it })
         )
 
         val circleStyleMenu = Menu("Circle")
         circleStyleMenu.items.addAll(
-            colorSubMenu("Color", { styleSettings.circleColor }, { styleSettings.circleColor = it }),
-            strokeStyleSubMenu({ styleSettings.circleStrokeStyle }, { styleSettings.circleStrokeStyle = it }),
-            strokeThicknessSubMenu({ styleSettings.circleStrokeThickness }, { styleSettings.circleStrokeThickness = it })
+            colorSubMenu("Color", "Circle", { styleSettings.circleColor }, { styleSettings.circleColor = it }),
+            strokeStyleSubMenu("Circle", { styleSettings.circleStrokeStyle }, { styleSettings.circleStrokeStyle = it }),
+            strokeThicknessSubMenu("Circle", { styleSettings.circleStrokeThickness }, { styleSettings.circleStrokeThickness = it })
         )
 
         val angleStyleMenu = Menu("Angle")
         angleStyleMenu.items.addAll(
-            colorSubMenu("Color", { styleSettings.angleColor }, { styleSettings.angleColor = it }),
-            sizeSubMenu("Size", { styleSettings.angleSize }, { styleSettings.angleSize = it })
+            colorSubMenu("Color", "Angle", { styleSettings.angleColor }, { styleSettings.angleColor = it }),
+            sizeSubMenu("Size", "Angle", { styleSettings.angleSize }, { styleSettings.angleSize = it })
         )
 
         val regionStyleMenu = Menu("Region")
         regionStyleMenu.items.add(
-            colorSubMenu("Color", { styleSettings.regionColor }, { styleSettings.regionColor = it })
+            colorSubMenu("Color", "Region", { styleSettings.regionColor }, { styleSettings.regionColor = it })
         )
 
         styleMenu.items.addAll(pointStyleMenu, linearStyleMenu, circleStyleMenu, angleStyleMenu, regionStyleMenu)

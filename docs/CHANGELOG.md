@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.4.0] - 2026-11-14
+
+### Changed
+
+- Style menu now applies to selected objects: when objects of the matching category are selected, style changes modify those objects instead of updating defaults
+
 ## [2.3.0] - 2026-11-08
 
 ### Changed
