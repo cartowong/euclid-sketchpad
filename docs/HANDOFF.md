@@ -46,4 +46,4 @@
 
 ## Known Issues / Gaps
 
-- **PDF export not implemented yet.** The agreed design is in `docs/SPEC.md` §12.7: PDFBox, a shared rendering walker with PNG/SVG snapshot tests added first, W×H-point pages, v2.5.0. Still open: the font for PDF labels, PDF metadata, and the PDF test approach.
+- **PDF export not implemented yet.** The agreed design is in `docs/SPEC.md` §12.7: PDFBox, a shared rendering walker with PNG/SVG snapshot tests added first, W×H-point pages, v2.5.0. Labels use embedded DejaVu Sans. Still open: PDF metadata and the PDF test approach.

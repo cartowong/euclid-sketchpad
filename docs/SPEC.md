@@ -721,11 +721,12 @@ Agreed design for adding PDF as a third export format:
 - **Shared rendering walker**: refactor `ExportRenderer` so that the grid and the 5-pass object logic (clipping, arrowheads, label baseline shift) are written once. They will call a small internal drawing interface (line, arc, circle, polygon with fill/alpha, text, dash) with PNG, SVG, and PDF backends. Before refactoring, add snapshot tests for PNG and SVG output so the refactor can be checked for regressions.
 - **Page size**: one page of exactly W×H points, matching the Width/Height fields 1:1 (same semantics as SVG). No paper-size options.
 - **Transparent background**: applies to PDF as it does to SVG. When checked, no white background rectangle is drawn.
+- **Label font**: DejaVu Sans (bundled TTF in `src/main/resources/fonts/`, license added to `THIRD_PARTY_NOTICES`), embedded via `PDType0Font.load()` so only the glyphs used are included. Same font in all three sister projects. Characters the font lacks (e.g. CJK, emoji) are replaced with `?` and the export shows a warning rather than failing. PNG and SVG label fonts are unchanged.
 - **Dialog**: add a third Format radio button (PDF) and a `*.pdf` file-chooser filter.
 - **Headless export**: produces 9 files (3 methods × PNG/SVG/PDF). `ExportFormat.entries` already drives the loop, so only the "6 files" messages and the project skill docs need updating.
 - **Release**: ships as v2.5.0 with CHANGELOG, README feature list, and HANDOFF updates.
 
-**Still open:** the font for PDF labels (standard Helvetica vs. an embedded font; depends on which label characters must be supported), PDF metadata (title, creator), and the PDF test approach (for example, parsing the output back with PDFBox).
+**Still open:** PDF metadata (title, creator) and the PDF test approach (for example, parsing the output back with PDFBox).
 
 ---
 
