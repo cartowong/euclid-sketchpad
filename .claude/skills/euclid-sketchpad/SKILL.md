@@ -1,6 +1,6 @@
 ---
 name: euclid-sketchpad
-description: Project skills for Euclid Sketchpad. Supports 4 actions — "deploy app" (version release), "export diagram" (headless PNG/SVG), "merge pr" (merge release PR and push tag), "update screenshot" (copy app screenshot to GitHub Pages). Use when user says "deploy", "release", "cut a release", "export diagram", "merge release", "merge release pr", "update screenshot", or invokes /euclid-sketchpad.
+description: Project skills for Euclid Sketchpad. Supports 4 actions — "deploy app" (version release), "export diagram" (headless PNG/SVG/PDF), "merge pr" (merge release PR and push tag), "update screenshot" (copy app screenshot to GitHub Pages). Use when user says "deploy", "release", "cut a release", "export diagram", "merge release", "merge release pr", "update screenshot", or invokes /euclid-sketchpad.
 allowed-tools: Bash(git tag *) Bash(git add *) Bash(git commit *) Bash(git push *) Bash(gh pr *) Bash(./gradlew *) Bash(ls *) Bash(git checkout *) Bash(git pull *) Bash(git branch *) Bash(git diff *) Bash(git log *) Bash(git status *) Bash(cp *)
 ---
 
@@ -110,7 +110,7 @@ Check which branch you are on (`git branch --show-current`).
 
 ## Export Diagram
 
-Headless export of a diagram file to 6 images (3 modes x 2 formats).
+Headless export of a diagram file to 9 files (3 modes x 3 formats: PNG, SVG, PDF).
 
 ### Inputs
 
@@ -126,10 +126,10 @@ If the user did not provide a diagram path, **ask for one before proceeding**.
    ```
    ./gradlew run --args="--export <diagram-path> <output-dir>"
    ```
-3. Verify output with `ls -la <output-dir>/`. Expect 6 non-zero-size files:
-   - `<name>_canvas.png`, `<name>_canvas.svg`
-   - `<name>_custom.png`, `<name>_custom.svg`
-   - `<name>_autofit.png`, `<name>_autofit.svg`
+3. Verify output with `ls -la <output-dir>/`. Expect 9 non-zero-size files:
+   - `<name>_canvas.png`, `<name>_canvas.svg`, `<name>_canvas.pdf`
+   - `<name>_custom.png`, `<name>_custom.svg`, `<name>_custom.pdf`
+   - `<name>_autofit.png`, `<name>_autofit.svg`, `<name>_autofit.pdf`
 4. Report the results to the user.
 
 ---

@@ -1,17 +1,17 @@
 # Euclid Sketchpad — Handoff Document
 
-**Date:** 2026-11-14
+**Date:** 2026-11-26
 **Branch:** `main`
 
 ## Current State
 
-- **Build:** `./gradlew clean test` passes (151 tests). Clean build.
+- **Build:** `./gradlew clean test` passes (158 tests). Clean build.
 - **Git:** `.claude/` is gitignored.
 - **Runtime:** `./gradlew run` launches the full app.
-- **Headless export:** `./gradlew run --args="--export <diagram.json> [outDir]"` exports 6 files without opening the GUI.
+- **Headless export:** `./gradlew run --args="--export <diagram.json> [outDir]"` exports 9 files (3 methods × PNG/SVG/PDF) without opening the GUI.
 - **Packaging:** `./gradlew jpackage` produces `build/jpackage/EuclidSketchpad-2.4.0.dmg` (~35 MB). `./gradlew jpackageImage` builds just the `.app` (faster, for testing). Not code-signed.
-- **License:** GPL v3.0. Third-party notices for AtlantaFX (MIT), OpenJFX (GPL 2.0 + Classpath Exception), and kotlinx.serialization (Apache 2.0) are bundled in `src/main/resources/THIRD_PARTY_NOTICES` and viewable from the About dialog.
-- **Spec alignment:** All features described in `docs/SPEC.md` are implemented, except PDF export (§12.7), which is designed but not yet built.
+- **License:** GPL v3.0. Third-party notices for AtlantaFX (MIT), OpenJFX (GPL 2.0 + Classpath Exception), kotlinx.serialization (Apache 2.0), Apache PDFBox and Commons Logging (Apache 2.0), and the DejaVu Sans font (Bitstream Vera license) are bundled in `src/main/resources/THIRD_PARTY_NOTICES` and viewable from the About dialog.
+- **Spec alignment:** All features described in `docs/SPEC.md` are implemented, including PDF export (§12.7). PDF export is not yet released (planned for v2.5.0; CHANGELOG/README/version bump pending).
 - **GitHub Pages:** `docs/` contains a static site (landing page, privacy policy, support page) served from `main` branch via GitHub Pages at `https://cartowong.github.io/euclid-sketchpad/`. Images are copies of app assets to stay within the `/docs` serving root.
 
 ## Architecture Notes
@@ -42,8 +42,9 @@
 - **Export label offsets negate `labelOffsetY` and add a baseline shift.** The canvas renderer positions labels at `anchorY + offsetY` in world coordinates and applies `scaleY = -1` to un-mirror text — the visual flip implicitly inverts the offset direction and also shifts the visual baseline by `ascent - descent` pixels (due to JavaFX pivoting the scale around the layout bounds center). The export renderers use `ty()` (which already flips y mathematically), so they apply `ty(anchorY) - offsetY + baselineShift` where `baselineShift = -(layoutBounds.minY + layoutBounds.maxY)` to match the canvas visual position.
 
 - **Per-object styling uses `StyleSettings` and `ObjectMetadata` fields.** Each object has `color`, `size`, `strokeStyle`, and `strokeThickness` fields on `ObjectMetadata`. `StyleSettings` (in `model/StyleSettings.kt`) holds per-category defaults applied to new objects via `GeometricObjectManager.onObjectAdded`. The Style menu is dual-purpose: when objects of the matching category are selected, it applies the style change to those objects' `ObjectMetadata` (with undo checkpoint and re-render); when nothing matching is selected, it updates the `StyleSettings` default for newly created objects. The right-click context menu on canvas or object table also changes styles on selected objects (same-category only). Renderers (`GeometryRenderer`, `ExportRenderer`) read per-object metadata for all 5 passes. `StyleSettings.colorToHex()`, `pointRadius()`, `angleArcRadius()`, `strokeThicknessPixels()` centralize value mappings. Serialization uses nullable fields with type-aware defaults for backward compatibility (old files without style fields get correct defaults: Angle→green, Region→yellow, all others→black). Construction files strip style fields on save.
+- **Export is one walker over three backends.** `ExportRenderer.render()` holds the grid and 5-pass logic (clipping, arrowheads, label baseline shift) once, in top-down output-pixel space, and draws through the internal `ExportCanvas` interface (`gridLine`, `line`, `polygon`, `arrowhead`, `circle`, `dot`, `arc`, `wedge`, `text`, `finish`). Angles are radians, counter-clockwise on screen. `PngExportCanvas`/`SvgExportCanvas` reproduce the pre-refactor output exactly (the SVG goldens are byte-for-byte; some methods like `gridLine`/`dot` exist only because SVG formats those numbers differently). `PdfExportCanvas` uses PDFBox, flips the content stream's y-axis once, flips text back with a text matrix, and embeds a DejaVu Sans subset. `export()` returns a list of warnings (PDF: characters missing from the font, replaced with `?`).
 - **Angle hit-testing uses per-object arc radius.** `HitTester` reads `meta.size` for each angle to compute zoom-aware arc radius, matching the visual arc size set by the renderer.
 
 ## Known Issues / Gaps
 
-- **PDF export not implemented yet.** The agreed design is in `docs/SPEC.md` §12.7: PDFBox, a shared rendering walker with PNG/SVG snapshot tests added first, W×H-point pages, v2.5.0. Labels use embedded DejaVu Sans. Still open: PDF metadata and the PDF test approach.
+- None currently.

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="white"/>
+  <line x1="0.00" y1="0" x2="0.00" y2="600.0" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="40.00" y1="0" x2="40.00" y2="600.0" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="80.00" y1="0" x2="80.00" y2="600.0" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="120.00" y1="0" x2="120.00" y2="600.0" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="160.00" y1="0" x2="160.00" y2="600.0" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="200.00" y1="0" x2="200.00" y2="600.0" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="240.00" y1="0" x2="240.00" y2="600.0" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="280.00" y1="0" x2="280.00" y2="600.0" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="320.00" y1="0" x2="320.00" y2="600.0" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="360.00" y1="0" x2="360.00" y2="600.0" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="400.00" y1="0" x2="400.00" y2="600.0" stroke="#808080" stroke-width="1.0"/>
+  <line x1="440.00" y1="0" x2="440.00" y2="600.0" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="480.00" y1="0" x2="480.00" y2="600.0" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="520.00" y1="0" x2="520.00" y2="600.0" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="560.00" y1="0" x2="560.00" y2="600.0" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="600.00" y1="0" x2="600.00" y2="600.0" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="640.00" y1="0" x2="640.00" y2="600.0" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="680.00" y1="0" x2="680.00" y2="600.0" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="720.00" y1="0" x2="720.00" y2="600.0" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="760.00" y1="0" x2="760.00" y2="600.0" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="800.00" y1="0" x2="800.00" y2="600.0" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="0" y1="580.00" x2="800.0" y2="580.00" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="0" y1="540.00" x2="800.0" y2="540.00" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="0" y1="500.00" x2="800.0" y2="500.00" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="0" y1="460.00" x2="800.0" y2="460.00" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="0" y1="420.00" x2="800.0" y2="420.00" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="0" y1="380.00" x2="800.0" y2="380.00" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="0" y1="340.00" x2="800.0" y2="340.00" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="0" y1="300.00" x2="800.0" y2="300.00" stroke="#808080" stroke-width="1.0"/>
+  <line x1="0" y1="260.00" x2="800.0" y2="260.00" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="0" y1="220.00" x2="800.0" y2="220.00" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="0" y1="180.00" x2="800.0" y2="180.00" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="0" y1="140.00" x2="800.0" y2="140.00" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="0" y1="100.00" x2="800.0" y2="100.00" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="0" y1="60.00" x2="800.0" y2="60.00" stroke="#d9d9d9" stroke-width="0.5"/>
+  <line x1="0" y1="20.00" x2="800.0" y2="20.00" stroke="#d9d9d9" stroke-width="0.5"/>
+  <polygon points="200.00,400.00 500.00,460.00 400.00,140.00" fill="#FFEB3B" fill-opacity="0.3" stroke="none"/>
+  <path d="M 200.00 400.00 L 229.42 405.88 A 30.0 30.0 0 1 1 218.29 376.22 Z" fill="#4CAF50" fill-opacity="0.3" stroke="#4CAF50" stroke-opacity="0.7" stroke-width="1"/>
+  <line x1="200.00" y1="400.00" x2="500.00" y2="460.00" stroke="#F44336" stroke-width="3.0"/>
+  <line x1="500.00" y1="460.00" x2="400.00" y2="140.00" stroke="#000000" stroke-width="1.0" stroke-dasharray="6 4"/>
+  <line x1="16.00" y1="124.00" x2="408.00" y2="12.00" stroke="#795548" stroke-width="2.0" stroke-dasharray="6 4"/>
+  <polygon points="408.00,12.00 401.19,17.27 399.43,11.12" fill="#795548"/>
+  <polygon points="16.00,124.00 22.81,118.73 24.57,124.88" fill="#795548"/>
+  <line x1="60.00" y1="540.00" x2="784.00" y2="105.60" stroke="#9C27B0" stroke-width="2.0"/>
+  <polygon points="784.00,105.60 778.79,112.46 775.49,106.97" fill="#9C27B0"/>
+  <circle cx="520.00" cy="220.00" r="80.00" fill="none" stroke="#000000" stroke-width="2.0"/>
+  <path d="M 784.00 388.00 A 140.00 140.00 0 0 0 591.11 588.00" fill="none" stroke="#F44336" stroke-width="3.0" stroke-dasharray="6 4"/>
+  <circle cx="200.00" cy="400.00" r="6.0" fill="#F44336"/>
+  <circle cx="500.00" cy="460.00" r="3.0" fill="#000000"/>
+  <circle cx="400.00" cy="140.00" r="4.0" fill="#9C27B0"/>
+  <circle cx="100.00" cy="100.00" r="4.0" fill="#000000"/>
+  <circle cx="60.00" cy="540.00" r="4.0" fill="#000000"/>
+  <circle cx="160.00" cy="480.00" r="4.0" fill="#000000"/>
+  <circle cx="520.00" cy="220.00" r="4.0" fill="#000000"/>
+  <circle cx="520.00" cy="140.00" r="4.0" fill="#000000"/>
+  <circle cx="700.00" cy="500.00" r="4.0" fill="#000000"/>
+  <circle cx="700.00" cy="360.00" r="4.0" fill="#000000"/>
+  <text x="210.00" y="419.07" font-size="12.0" fill="black">A</text>
+  <text x="480.00" y="487.07" font-size="12.0" fill="black">B</text>
+  <text x="410.00" y="159.07" font-size="12.0" fill="black">C</text>
+  <text x="355.00" y="427.07" font-size="12.0" fill="black">s</text>
+  <text x="530.00" y="159.07" font-size="12.0" fill="black">c</text>
+</svg>

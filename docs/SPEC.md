@@ -54,8 +54,8 @@ src/main/resources/
 | `Sidebar` | ui | Left pane (objects table) and right pane (constructions + measurements tables). |
 | `DiagramSerializer` | persistence | Serializes/deserializes the full diagram to/from JSON. |
 | `ConstructionSerializer` | persistence | Saves constructions (with labels nulled) and loads construction files into `LoadedConstruction` records. |
-| `ExportRenderer` | export | Renders to PNG (via JavaFX snapshot) or SVG (manual string generation). |
-| `HeadlessExportApp` | export | CLI-driven headless export. Loads a diagram JSON and exports 6 files (canvas/custom/autofit × PNG/SVG). |
+| `ExportRenderer` | export | Shared rendering walker (grid + 5 passes) that draws through the `ExportCanvas` interface. Backends: `PngExportCanvas` (JavaFX snapshot), `SvgExportCanvas` (manual string generation), `PdfExportCanvas` (PDFBox). |
+| `HeadlessExportApp` | export | CLI-driven headless export. Loads a diagram JSON and exports 9 files (canvas/custom/autofit × PNG/SVG/PDF). |
 
 ### 2.3 Coordinate System
 
@@ -655,7 +655,7 @@ Every JSON file (diagram or construction) includes top-level `"appName"` and `"v
 Non-modal dialog with:
 
 - **Method**: 3 radio buttons (Canvas, Custom, Auto-fit).
-- **Format**: 2 radio buttons (PNG, SVG).
+- **Format**: 3 radio buttons (PNG, SVG, PDF).
 - **Options**: "Transparent background" checkbox, "Include grid" checkbox (both default off).
 - **Dimensions**: Width and Height text fields.
 - **Buttons**: Export, Cancel.
@@ -685,7 +685,7 @@ Exports at the canvas's current screen size. Width/height fields are non-editabl
 
 ### 12.5 Export Rendering
 
-Both PNG and SVG exports share the same rendering logic:
+All three formats share the same rendering logic (written once in `ExportRenderer` and drawn through the internal `ExportCanvas` interface):
 
 - Selection and hover states are cleared (all objects render in their per-object color).
 - 5 passes: regions → angles → linears/circles → points → labels.
@@ -698,6 +698,10 @@ Both PNG and SVG exports share the same rendering logic:
 
 **SVG**: generates SVG XML string manually. Each object type maps to SVG elements: points → `<circle>`, linears → `<line>`, circles → `<circle>`, angles → `<path>` (arc), regions → `<polygon>`, labels → `<text>`. Coordinates are y-flipped. Numbers formatted to 2 decimal places.
 
+**PDF**: see §12.7.
+
+Snapshot tests (`ExportRendererSnapshotTest`) compare PNG and SVG output of a fixture diagram against goldens in `src/test/resources/export-snapshots/` (SVG exact; PNG with a small pixel tolerance). Regenerate with `UPDATE_SNAPSHOTS=1 ./gradlew test`.
+
 ### 12.6 Headless Export (CLI)
 
 The app supports a `--export` CLI flag for batch export without a GUI window:
@@ -709,24 +713,19 @@ The app supports a `--export` CLI flag for batch export without a GUI window:
 - **diagram.json** (required): path to a diagram file.
 - **outputDir** (optional, default `exports/`): directory for output files.
 
-Produces 6 files: `<name>_canvas.png/svg` (1000×700, default viewport), `<name>_custom.png/svg` (1920×1080, auto-fit bounds), `<name>_autofit.png/svg` (1920×auto, auto-fit bounds with aspect-ratio height). All exports use white background, no grid.
+Produces 9 files: `<name>_canvas.png/svg/pdf` (1000×700, default viewport), `<name>_custom.png/svg/pdf` (1920×1080, auto-fit bounds), `<name>_autofit.png/svg/pdf` (1920×auto, auto-fit bounds with aspect-ratio height). All exports use white background, no grid.
 
-`HeadlessExportApp` is a JavaFX `Application` subclass (required for PNG snapshot). It loads the diagram, runs `ExportRenderer.export()` for each combination, and calls `Platform.exit()`.
+`HeadlessExportApp` is a JavaFX `Application` subclass (required for PNG snapshot). It loads the diagram, runs `ExportRenderer.export()` for each combination, prints any export warnings to stderr, and calls `Platform.exit()`.
 
-### 12.7 PDF Export (Planned — v2.5.0, not yet implemented)
+### 12.7 PDF Export
 
-Agreed design for adding PDF as a third export format:
-
-- **Library**: Apache PDFBox 3.x (Apache 2.0) draws true vector output: paths, Bézier arcs, dash patterns, fill transparency for regions, text. Add it to `build.gradle.kts`, add its notice to `THIRD_PARTY_NOTICES`, and check that it runs within the hardcoded jpackage modules (`java.base`, `java.desktop`, `java.logging`, `jdk.unsupported`).
-- **Shared rendering walker**: refactor `ExportRenderer` so that the grid and the 5-pass object logic (clipping, arrowheads, label baseline shift) are written once. They will call a small internal drawing interface (line, arc, circle, polygon with fill/alpha, text, dash) with PNG, SVG, and PDF backends. Before refactoring, add snapshot tests for PNG and SVG output so the refactor can be checked for regressions.
-- **Page size**: one page of exactly W×H points, matching the Width/Height fields 1:1 (same semantics as SVG). No paper-size options.
-- **Transparent background**: applies to PDF as it does to SVG. When checked, no white background rectangle is drawn.
-- **Label font**: DejaVu Sans (bundled TTF in `src/main/resources/fonts/`, license added to `THIRD_PARTY_NOTICES`), embedded via `PDType0Font.load()` so only the glyphs used are included. Same font in all three sister projects. Characters the font lacks (e.g. CJK, emoji) are replaced with `?` and the export shows a warning rather than failing. PNG and SVG label fonts are unchanged.
-- **Dialog**: add a third Format radio button (PDF) and a `*.pdf` file-chooser filter.
-- **Headless export**: produces 9 files (3 methods × PNG/SVG/PDF). `ExportFormat.entries` already drives the loop, so only the "6 files" messages and the project skill docs need updating.
-- **Release**: ships as v2.5.0 with CHANGELOG, README feature list, and HANDOFF updates.
-
-**Still open:** PDF metadata (title, creator) and the PDF test approach (for example, parsing the output back with PDFBox).
+- **Library**: Apache PDFBox 3.x (Apache 2.0) draws true vector output: paths, Bézier arcs (≤90° per cubic), dash patterns, fill/stroke transparency via an extended graphics state, text. Runs within the hardcoded jpackage modules (`java.base`, `java.desktop`, `java.logging`, `jdk.unsupported`).
+- **Page size**: one page of exactly W×H points, matching the Width/Height fields 1:1 (same semantics as SVG). No paper-size options. The backend flips the content stream's y-axis once so it draws in the shared top-down pixel space.
+- **Transparent background**: applies as in SVG. When checked, no white background rectangle is drawn.
+- **Label font**: DejaVu Sans 2.37 (bundled at `src/main/resources/fonts/DejaVuSans.ttf`, license in `THIRD_PARTY_NOTICES`), embedded as a subset via `PDType0Font.load()`. Same font in all three sister projects. Characters the font lacks (e.g. CJK) are replaced with `?`; `ExportRenderer.export()` returns a warning, which the dialog shows in an alert and headless export prints. PNG and SVG label fonts are unchanged.
+- **Metadata**: Title = output file name without extension; Creator = `"$APP_NAME $APP_VERSION"`. Nothing else.
+- **Dialog**: third Format radio button (PDF) and a `*.pdf` file-chooser filter.
+- **Tests** (`PdfExportTest`): parse the output back with PDFBox (`Loader.loadPDF`) and assert one page with mediabox W×H, title/creator, an embedded DejaVu Sans subset, label text via `PDFTextStripper`, white vs. transparent background, a colored pixel at a known point location when rendered with `PDFRenderer`, and `?` plus a warning for unsupported characters.
 
 ---
 

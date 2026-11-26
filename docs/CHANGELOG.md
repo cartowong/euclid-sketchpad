@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased] - 2026-11-26
+
+### Added
+
+- PDF export: vector output with one page of exactly Width × Height points, DejaVu Sans labels embedded as a subset, and a warning when a label character is not available in the font
+- Headless export (`--export`) now writes 9 files (PNG, SVG and PDF for each method)
+
+### Fixed
+
+- PNG export drew circles clipped at the export edge as mirrored arcs (flipped top-to-bottom)
+
 ## [2.4.0] - 2026-11-14
 
 ### Changed
