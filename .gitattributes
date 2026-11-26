@@ -1,0 +1,2 @@
+# Snapshot goldens are compared byte-for-byte; keep them identical on every OS.
+src/test/resources/export-snapshots/** -text
