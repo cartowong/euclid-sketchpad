@@ -713,6 +713,20 @@ Produces 6 files: `<name>_canvas.png/svg` (1000×700, default viewport), `<name>
 
 `HeadlessExportApp` is a JavaFX `Application` subclass (required for PNG snapshot). It loads the diagram, runs `ExportRenderer.export()` for each combination, and calls `Platform.exit()`.
 
+### 12.7 PDF Export (Planned — v2.5.0, not yet implemented)
+
+Agreed design for adding PDF as a third export format:
+
+- **Library**: Apache PDFBox 3.x (Apache 2.0) draws true vector output: paths, Bézier arcs, dash patterns, fill transparency for regions, text. Add it to `build.gradle.kts`, add its notice to `THIRD_PARTY_NOTICES`, and check that it runs within the hardcoded jpackage modules (`java.base`, `java.desktop`, `java.logging`, `jdk.unsupported`).
+- **Shared rendering walker**: refactor `ExportRenderer` so that the grid and the 5-pass object logic (clipping, arrowheads, label baseline shift) are written once. They will call a small internal drawing interface (line, arc, circle, polygon with fill/alpha, text, dash) with PNG, SVG, and PDF backends. Before refactoring, add snapshot tests for PNG and SVG output so the refactor can be checked for regressions.
+- **Page size**: one page of exactly W×H points, matching the Width/Height fields 1:1 (same semantics as SVG). No paper-size options.
+- **Transparent background**: applies to PDF as it does to SVG. When checked, no white background rectangle is drawn.
+- **Dialog**: add a third Format radio button (PDF) and a `*.pdf` file-chooser filter.
+- **Headless export**: produces 9 files (3 methods × PNG/SVG/PDF). `ExportFormat.entries` already drives the loop, so only the "6 files" messages and the project skill docs need updating.
+- **Release**: ships as v2.5.0 with CHANGELOG, README feature list, and HANDOFF updates.
+
+**Still open:** the font for PDF labels (standard Helvetica vs. an embedded font; depends on which label characters must be supported), PDF metadata (title, creator), and the PDF test approach (for example, parsing the output back with PDFBox).
+
 ---
 
 ## 13. Escape Key Handling

@@ -11,7 +11,7 @@
 - **Headless export:** `./gradlew run --args="--export <diagram.json> [outDir]"` exports 6 files without opening the GUI.
 - **Packaging:** `./gradlew jpackage` produces `build/jpackage/EuclidSketchpad-2.4.0.dmg` (~35 MB). `./gradlew jpackageImage` builds just the `.app` (faster, for testing). Not code-signed.
 - **License:** GPL v3.0. Third-party notices for AtlantaFX (MIT), OpenJFX (GPL 2.0 + Classpath Exception), and kotlinx.serialization (Apache 2.0) are bundled in `src/main/resources/THIRD_PARTY_NOTICES` and viewable from the About dialog.
-- **Spec alignment:** All features described in `docs/SPEC.md` are implemented.
+- **Spec alignment:** All features described in `docs/SPEC.md` are implemented, except PDF export (§12.7), which is designed but not yet built.
 - **GitHub Pages:** `docs/` contains a static site (landing page, privacy policy, support page) served from `main` branch via GitHub Pages at `https://cartowong.github.io/euclid-sketchpad/`. Images are copies of app assets to stay within the `/docs` serving root.
 
 ## Architecture Notes
@@ -46,4 +46,4 @@
 
 ## Known Issues / Gaps
 
-None.
+- **PDF export not implemented yet.** The agreed design is in `docs/SPEC.md` §12.7: PDFBox, a shared rendering walker with PNG/SVG snapshot tests added first, W×H-point pages, v2.5.0. Still open: the font for PDF labels, PDF metadata, and the PDF test approach.
