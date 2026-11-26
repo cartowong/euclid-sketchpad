@@ -28,6 +28,11 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    // Same JavaFX rasterizer on every machine (CI runners have no GPU), so PNG goldens match.
+    systemProperty("prism.order", "sw")
+    testLogging {
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
 }
 
 application {

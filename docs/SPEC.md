@@ -700,7 +700,7 @@ All three formats share the same rendering logic (written once in `ExportRendere
 
 **PDF**: see §12.7.
 
-Snapshot tests (`ExportRendererSnapshotTest`) compare PNG and SVG output of a fixture diagram against goldens in `src/test/resources/export-snapshots/` (SVG exact; PNG with a small pixel tolerance). Regenerate with `UPDATE_SNAPSHOTS=1 ./gradlew test`.
+Snapshot tests (`ExportRendererSnapshotTest`) compare PNG and SVG output of a fixture diagram against goldens in `src/test/resources/export-snapshots/` (SVG exact except label `y`, which depends on the platform's default font metrics and is compared within 1.5px; PNG rendered without labels and compared with a small pixel tolerance). Tests force JavaFX's software pipeline (`prism.order=sw`) so PNG rasterization matches across machines and CI. Regenerate with `UPDATE_SNAPSHOTS=1 ./gradlew test`.
 
 ### 12.6 Headless Export (CLI)
 

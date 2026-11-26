@@ -6,7 +6,11 @@ on:
 
 jobs:
   test:
-    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -19,3 +23,10 @@ jobs:
 
       - name: Run tests
         run: ./gradlew test
+
+      - name: Upload snapshot outputs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshot-actual-${{ matrix.os }}
+          path: build/snapshot-actual/

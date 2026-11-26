@@ -7,7 +7,6 @@ import javafx.application.Platform
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -24,6 +23,13 @@ class ExportRendererSnapshotTest {
     companion object {
         private val SNAPSHOT_DIR = File("src/test/resources/export-snapshots")
         private val UPDATE = System.getenv("UPDATE_SNAPSHOTS") == "1"
+
+        // Kept under build/ (not a temp dir) so CI can upload them when a snapshot differs.
+        fun actualOutput(name: String) = File("build/snapshot-actual", name).also { it.parentFile.mkdirs() }
+
+        // Label y includes a baseline shift from the platform's default font metrics
+        // (0.87px apart on macOS vs Windows), so it is compared with a tolerance.
+        private val TEXT_Y = Regex("""(<text [^>]*\by=")([-\d.]+)(")""")
 
         @JvmStatic
         @BeforeAll
@@ -119,21 +125,30 @@ class ExportRendererSnapshotTest {
     }
 
     @Test
-    fun `SVG export matches golden`(@TempDir tmp: File) {
-        val out = File(tmp, "fixture.svg")
+    fun `SVG export matches golden`() {
+        val out = actualOutput("fixture.svg")
         exportOnFxThread(fixtureSettings(ExportFormat.SVG), buildFixture(), out)
         val golden = File(SNAPSHOT_DIR, "fixture.svg")
         if (UPDATE) {
             SNAPSHOT_DIR.mkdirs()
             out.copyTo(golden, overwrite = true)
         }
-        assertEquals(golden.readText(), out.readText())
+        val expected = golden.readText()
+        val actual = out.readText()
+        val blankY = { s: String -> TEXT_Y.replace(s) { it.groupValues[1] + "_" + it.groupValues[3] } }
+        assertEquals(blankY(expected), blankY(actual))
+        val expectedY = TEXT_Y.findAll(expected).map { it.groupValues[2].toDouble() }.toList()
+        val actualY = TEXT_Y.findAll(actual).map { it.groupValues[2].toDouble() }.toList()
+        expectedY.zip(actualY).forEach { (e, a) -> assertEquals(e, a, 1.5, "label y") }
     }
 
     @Test
-    fun `PNG export matches golden`(@TempDir tmp: File) {
-        val out = File(tmp, "fixture.png")
-        exportOnFxThread(fixtureSettings(ExportFormat.PNG), buildFixture(), out)
+    fun `PNG export matches golden`() {
+        val out = actualOutput("fixture.png")
+        // Labels are off: glyph rasterization differs per OS, and label placement is
+        // already pinned by the SVG golden. Without them the threshold can stay tight.
+        val manager = buildFixture().also { m -> m.allObjects().forEach { m.getMetadata(it.id)!!.labelVisible = false } }
+        exportOnFxThread(fixtureSettings(ExportFormat.PNG), manager, out)
         val golden = File(SNAPSHOT_DIR, "fixture.png")
         if (UPDATE) {
             SNAPSHOT_DIR.mkdirs()
@@ -144,9 +159,9 @@ class ExportRendererSnapshotTest {
         assertEquals(expected.width, actual.width)
         assertEquals(expected.height, actual.height)
 
-        // Tolerance absorbs antialiasing/text-rasterization drift between JavaFX
-        // builds and GPU/software pipelines (CI runs macOS-latest). Kept tight: the
-        // pre-fix PNG bug (clipped arcs mirrored vertically) differed in only 0.24%.
+        // Tests force the software pipeline (build.gradle.kts), so the remaining drift is
+        // small antialiasing noise. Kept tight: the pre-fix PNG bug (clipped arcs
+        // mirrored vertically) differed in only 0.24% of pixels.
         val maxChannelDelta = 8
         var differing = 0
         for (y in 0 until expected.height) {
