@@ -7,7 +7,6 @@ import javafx.application.Platform
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -24,6 +23,9 @@ class ExportRendererSnapshotTest {
     companion object {
         private val SNAPSHOT_DIR = File("src/test/resources/export-snapshots")
         private val UPDATE = System.getenv("UPDATE_SNAPSHOTS") == "1"
+
+        // Kept under build/ (not a temp dir) so CI can upload them when a snapshot differs.
+        fun actualOutput(name: String) = File("build/snapshot-actual", name).also { it.parentFile.mkdirs() }
 
         @JvmStatic
         @BeforeAll
@@ -119,8 +121,8 @@ class ExportRendererSnapshotTest {
     }
 
     @Test
-    fun `SVG export matches golden`(@TempDir tmp: File) {
-        val out = File(tmp, "fixture.svg")
+    fun `SVG export matches golden`() {
+        val out = actualOutput("fixture.svg")
         exportOnFxThread(fixtureSettings(ExportFormat.SVG), buildFixture(), out)
         val golden = File(SNAPSHOT_DIR, "fixture.svg")
         if (UPDATE) {
@@ -131,8 +133,8 @@ class ExportRendererSnapshotTest {
     }
 
     @Test
-    fun `PNG export matches golden`(@TempDir tmp: File) {
-        val out = File(tmp, "fixture.png")
+    fun `PNG export matches golden`() {
+        val out = actualOutput("fixture.png")
         exportOnFxThread(fixtureSettings(ExportFormat.PNG), buildFixture(), out)
         val golden = File(SNAPSHOT_DIR, "fixture.png")
         if (UPDATE) {
