@@ -18,7 +18,7 @@
 - **Measurements** — measure segment lengths, angles, circle circumferences, and region areas
 - **Custom constructions** — record a sequence of steps, save it, and reapply it with different inputs
 - **Built-in constructions** — midpoint, parallel line, perpendicular line, and reflection point
-- **Export** — save diagrams as PNG or SVG with canvas, custom bounding box, or auto-fit methods
+- **Export** — save diagrams as PNG, SVG, or PDF with canvas, custom bounding box, or auto-fit methods
 - **Undo/redo** — full snapshot-based undo history
 
 ## Download
